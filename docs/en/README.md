@@ -43,8 +43,10 @@ ZealSync/
 ├── hermes/                         # Hermes harness skills
 │   └── Skills/
 │       └── zeal-onboarding/        # Hermes onboarding skill
+├── openclaw/                       # openClaw harness skills
+│   └── Skills/
+│       └── zeal-onboarding/        # openClaw onboarding skill
 ├── codex/                          # codex harness skills (reserved)
-├── openClaw/                       # openClaw harness skills (reserved)
 ├── .claude/rules/                  # Development rules
 ├── .docs/                          # Design docs & lessons learned
 └── USER-profile/                   # User profile output directory
@@ -103,11 +105,25 @@ hermes -s zeal-onboarding
 /skill zeal-onboarding
 ```
 
+### OpenClaw
+
+```bash
+# Copy skill to OpenClaw's skills directory
+cp -r ./openclaw/Skills/zeal-onboarding \
+      ~/.openclaw/workspace/skills/zeal-onboarding
+```
+
+Trigger in an OpenClaw conversation with any of:
+- "帮我创建社群画像"
+- "生成 USER.md"
+- "ZealSync onboarding"
+- "我要加入社群"
+
+**OpenClaw Features**:
+- Conversation: Natural dialogue (no explicit tool calls required)
+- Memory reading: Direct file reads from `~/.openclaw/workspace/` + `memory_search`/`memory_get` as supplementary search
+
 ### Codex (Reserved)
-
-Not yet adapted. Contributions welcome.
-
-### OpenClaw (Reserved)
 
 Not yet adapted. Contributions welcome.
 
@@ -132,3 +148,4 @@ Not yet adapted. Contributions welcome.
 ## Related Docs
 
 - [MIGRATION-NOTES.md](../../hermes/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Hermes migration notes
+- [MIGRATION-NOTES.md](../../openclaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw migration notes
