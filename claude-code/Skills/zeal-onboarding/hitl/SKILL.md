@@ -15,14 +15,46 @@ description: ZealSync onboarding HITL 确认与提交。生成 HTML 预览，引
 
 ## 流程
 
-### 1. 生成 HTML 预览
+### 1. 启动本地保存服务（优先方案）
 
-**模板文件位置**：`hitl/hitl-template.html`（与 `SKILL.md` 同级目录）
+**前置检测**：检查系统是否有 Python 3
+
+```bash
+which python3 || which python || echo "NO_PYTHON"
+```
+
+- **有 Python**：启动本地保存服务 `save-server.py`
+- **无 Python**：退回到方案 A（VS Code 直接编辑）
+
+**启动服务**：
+
+```bash
+# 启动后台 server，自动选择可用端口
+python3 ./claude-code/Skills/zeal-onboarding/hitl/save-server.py \
+  ./USER-profile/{{nickname}}/USER.md \
+  > /tmp/zeal-server-{{nickname}}.log 2>&1 &
+
+SERVER_PID=$!
+
+# 等待 server 启动并获取端口
+sleep 1
+SERVER_PORT=$(grep "SERVER_PORT:" /tmp/zeal-server-{{nickname}}.log | head -1 | cut -d: -f2)
+```
+
+**保存服务说明**：
+- 零第三方依赖，仅使用 Python 标准库
+- 监听随机可用端口，避免冲突
+- 接收 POST `/save` 请求，将内容写入指定文件路径
+- CORS 已配置，支持 file:// 页面的跨域请求
+
+### 2. 生成 HTML 预览
+
+**模板文件位置**：`hitl/hitl-template.html`
 
 **生成流程**：
 
 1. 读取模板文件 `hitl/hitl-template.html`
-2. 替换以下占位符：
+2. 替换占位符：
 
 | 占位符 | 替换内容 |
 |---|---|
@@ -31,7 +63,8 @@ description: ZealSync onboarding HITL 确认与提交。生成 HTML 预览，引
 | `{{TIMESTAMP}}` | 当前时间 |
 | `{{TAGS_HTML}}` | 标签渲染为 `<span class="tag">...</span>` |
 | `{{SECTIONS_HTML}}` | 各 Section 渲染为 `<div class="section">...</div>` |
-| `{{RAW_MARKDOWN}}` | 完整的 USER.md Markdown 原文（用于 textarea） |
+| `{{RAW_MARKDOWN}}` | 完整的 USER.md Markdown 原文 |
+| `{{SERVER_PORT}}` | 本地保存服务的端口号 |
 
 3. 保存到 `./USER-profile/[nickname]/hitl-preview.html`
 
@@ -49,9 +82,61 @@ description: ZealSync onboarding HITL 确认与提交。生成 HTML 预览，引
 - 列表保持 `<ul>` / `<li>` 结构
 - 代码块用 `<pre>` 包裹
 
-**模板维护**：
-- 修改样式或布局时，只需编辑 `hitl-template.html`
-- `SKILL.md` 中不包含 HTML 代码，只描述替换逻辑
+**保存交互逻辑**：
+
+浏览器中的"保存"按钮执行：
+1. `fetch('http://localhost:{{SERVER_PORT}}/save')` POST 修改后的内容
+2. Server 直接写入 `./USER-profile/{{nickname}}/USER.md`
+3. 无路径选择弹窗，一键保存到默认位置
+4. 如 server 不可用，自动降级为文件下载
+
+### 3. 打开浏览器
+
+```bash
+open ./USER-profile/{{nickname}}/hitl-preview.html
+```
+
+### 4. 等待用户确认
+
+在对话中询问：
+
+> 已在浏览器中打开你的画像预览，底部提供了 Markdown 编辑区。
+>
+> **操作方式**：
+> 1. 在浏览器中直接编辑，点击"保存"自动覆盖 `USER.md`
+> 2. 回到对话中回复 **"已保存"** 或 **"确认提交"**
+> 3. 如需 Agent 帮忙修改，回复 **"需要修改：[具体描述]"**
+
+### 5. 处理用户输入
+
+**情况 A：用户回复 "确认提交" 或 "已保存"**
+→ 读取 `./USER-profile/[nickname]/USER.md` 最新内容
+→ 关闭本地保存服务：`kill $SERVER_PID`
+→ 进入 Step 6（选择上传位置）
+
+**情况 B：用户描述具体修改**
+→ 直接在 `USER.md` 中应用修改
+→ 重新生成 HTML 预览
+→ 再次打开浏览器等待确认
+→ 最多允许 **3 轮修改**
+
+### 6. 关闭本地保存服务
+
+确认提交后必须关闭 server，避免端口占用：
+
+```bash
+kill $SERVER_PID 2>/dev/null || true
+```
+
+**无 Python 时的降级方案**：
+
+如系统无 Python，跳过 HTML 预览，直接执行：
+
+```bash
+open ./USER-profile/{{nickname}}/USER.md
+```
+
+用户用系统默认编辑器（VS Code / Typora 等）编辑并保存后，回到对话中确认。
 
 ### 2. 打开浏览器
 
