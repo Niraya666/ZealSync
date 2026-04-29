@@ -16,7 +16,6 @@ Thumbs.db
 *.swo
 
 # Project docs (local only)
-docs/
 .docs/
 
 # User-generated data (onboarding profiles)
