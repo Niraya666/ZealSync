@@ -47,6 +47,16 @@ SERVER_PORT=$(grep "SERVER_PORT:" /tmp/zeal-server-{{nickname}}.log | head -1 | 
 - 接收 POST `/save` 请求，将内容写入指定文件路径
 - CORS 已配置，支持 file:// 页面的跨域请求
 
+**无 Python 时的降级方案**：
+
+如系统无 Python，跳过 HTML 预览，直接执行：
+
+```bash
+open ./USER-profile/{{nickname}}/USER.md
+```
+
+用户用系统默认编辑器（VS Code / Typora 等）编辑并保存后，回到对话中确认。
+
 ### 2. 生成 HTML 预览
 
 **模板文件位置**：`hitl/hitl-template.html`
@@ -120,67 +130,16 @@ open ./USER-profile/{{nickname}}/hitl-preview.html
 → 再次打开浏览器等待确认
 → 最多允许 **3 轮修改**
 
-### 6. 关闭本地保存服务
+### 6. 选择上传位置
 
-确认提交后必须关闭 server，避免端口占用：
+**默认策略**：优先使用「个人知识库」(`--parent-position my_library`)，避免额外 OAuth scope 授权。
 
-```bash
-kill $SERVER_PID 2>/dev/null || true
-```
-
-**无 Python 时的降级方案**：
-
-如系统无 Python，跳过 HTML 预览，直接执行：
-
-```bash
-open ./USER-profile/{{nickname}}/USER.md
-```
-
-用户用系统默认编辑器（VS Code / Typora 等）编辑并保存后，回到对话中确认。
-
-### 2. 打开浏览器
-
-运行：
-```bash
-open ./USER-profile/[nickname]/hitl-preview.html
-```
-
-### 3. 等待用户确认
-
-在对话中询问：
-
-> 已在浏览器中打开你的画像预览，底部提供了 Markdown 编辑区。
->
-> **操作方式**：
-> 1. 在浏览器中直接编辑，点击"保存到本地"覆盖 `USER.md`
-> 2. 回到对话中回复 **"已保存"** 或 **"确认提交"**
-> 3. 如需 Agent 帮忙修改，回复 **"需要修改：[具体描述]"**
-
-### 4. 处理用户输入
-
-**情况 A：用户回复 "确认提交" 或 "已保存"**
-→ 读取 `./USER-profile/[nickname]/USER.md` 最新内容（因为用户可能已通过浏览器保存）
-→ 进入 Step 5（选择上传位置）
-
-**情况 B：用户描述具体修改（如"What I'm Looking For 里加上 xxx"）**
-→ 直接在 `USER.md` 中应用修改
-→ 重新生成 HTML 预览
-→ 再次打开浏览器等待确认
-→ 最多允许 **3 轮修改**，超过则建议完成后再更新
-
-**保存检测逻辑**：
-- 用户说"已保存"时，对比 `USER.md` 的修改时间戳
-- 如文件在预览生成后被修改过，自动读取最新版本
-- 如文件未变化，询问用户是否确认当前版本
-
-### 5. 选择上传位置
-
-在确认提交前，询问用户希望上传到飞书的哪个位置：
+在确认提交前询问：
 
 > 你希望将画像上传到飞书的哪个位置？
-> 1. **个人知识库**（默认，我的空间 › 知识库）
-> 2. **指定文件夹**（提供 folder token）
-> 3. **指定 Wiki 空间**（提供 space ID）
+> 1. **个人知识库**（推荐默认，无需额外授权）
+> 2. **指定文件夹**（需 `space:document:retrieve` scope，可能触发额外授权）
+> 3. **指定 Wiki 空间**（需 space ID）
 
 根据用户选择：
 
@@ -190,59 +149,85 @@ open ./USER-profile/[nickname]/hitl-preview.html
 | 指定文件夹 | `--parent-token {{folder_token}}` |
 | 指定 Wiki | `--wiki-space {{space_id}}` |
 
-如用户选择了文件夹或 Wiki 但无法提供 token，先执行：
+如用户选择了文件夹但无法提供 token，执行：
 ```bash
-# 搜索可用的 Wiki 空间
-lark-cli wiki spaces list --format pretty
-
-# 或搜索文件夹
-lark-cli drive file list --params '{"folder_token":"root"}' --format pretty
+# 搜索可用的文件夹
+lark-cli drive files list --params '{"folder_token":"root"}' --format pretty
 ```
 
-### 6. 上传飞书文档
+### 7. 构造上传文件
 
-用户确认后，执行上传。注意以下要点：
+Lark v2 API 不支持 `--title` 参数，需通过 content 中的 H1 设置文档标题。同时，YAML frontmatter 会被 Lark 解析为正文内容，上传前需剥离。
 
-**路径规则**：必须使用**相对路径**，先 `cd` 到 USER.md 所在目录再执行命令。
+**构造步骤**：
 
 ```bash
-# 先进入文件所在目录（关键：lark-cli 要求相对路径）
 cd ./USER-profile/{{nickname}}
 
-# 创建飞书文档（默认上传到个人知识库）
+# Step 1: 剥离 frontmatter，添加 H1 标题
+python3 -c "
+import re
+with open('USER.md', 'r') as f:
+    content = f.read()
+
+# 去掉 frontmatter
+content = re.sub(r'^---\n.*?\n---\n+', '', content, flags=re.DOTALL)
+
+# 在开头添加 H1 标题
+content = '# ZealSync Profile — {{nickname}}\n\n' + content
+
+with open('USER-lark.md', 'w') as f:
+    f.write(content)
+"
+```
+
+生成的 `USER-lark.md`：
+- 不含 YAML frontmatter
+- 以 `# Title` 开头，作为文档显示标题
+- 保留所有 Section 正文
+
+### 8. 上传飞书文档
+
+**路径规则**：使用相对路径，先 `cd` 到文件所在目录。
+
+```bash
+cd ./USER-profile/{{nickname}}
+
+# 创建飞书文档
 lark-cli docs +create \
   --api-version v2 \
-  --title "ZealSync Profile — {{nickname}}" \
-  --content @USER.md \
+  --content @USER-lark.md \
   --doc-format markdown \
   --parent-position my_library
 ```
 
-如需上传到指定位置，替换 `--parent-position` 为对应的参数：
-- 指定文件夹：`--parent-token {{folder_token}}`
-- 指定 Wiki：`--wiki-space {{space_id}}`
+**设置文档元数据标题**（文档列表、浏览器标签中显示）：
+```bash
+# 获取 document_token 从上一步输出
+lark-cli drive files patch \
+  --params '{"file_token":"DOC_TOKEN","type":"docx"}' \
+  --data '{"new_title":"ZealSync Profile — {{nickname}}"}' \
+  --yes
+```
 
-**从输出中提取**：
-- `document_token` — 文档唯一标识
-- `url` — 文档访问链接
-
-如需要更新已存在的文档：
+**如需更新已存在的文档**：
 ```bash
 cd ./USER-profile/{{nickname}}
 lark-cli docs +update \
   --api-version v2 \
   --doc {{document_token}} \
-  --markdown @USER.md \
+  --markdown @USER-lark.md \
   --mode overwrite
 ```
 
 **常见错误处理**：
-- `invalid file path` → 确认使用了相对路径 `@USER.md` 而非绝对路径
-- `Untitled` 文件名 → 确认传了 `--title` 参数
-- 文件未出现在预期位置 → 确认传了 `--parent-position` 或对应路径参数
+- `invalid file path` → 确认使用了相对路径 `@USER-lark.md` 而非绝对路径
+- `Untitled` 文件名 → 确认 `USER-lark.md` 以 `# Title` 开头
+- 权限不足 → 如使用「指定文件夹」，运行 `lark-cli auth login --scope "space:document:retrieve"` 补充授权
 
-### 7. 完成标记
+### 9. 完成标记
 
+- 关闭本地保存服务（如仍在运行）：`kill $SERVER_PID 2>/dev/null || true`
 - 将文档 URL 记录到 `.state.json`
 - 更新 `USER.md` 中的 Metadata：
   - `Confirmation Status: confirmed`
