@@ -161,39 +161,84 @@
   <!-- 下半部分：Markdown 编辑区 -->
   <div class="editor-section">
     <h2>编辑画像（Markdown）</h2>
-    <p class="editor-desc">直接在下方修改 Markdown 内容，改完后点击"复制"，然后粘贴回 Claude Code 对话中。</p>
+    <p class="editor-desc">直接在下方修改 Markdown 内容，改完后点击"保存"直接覆盖本地文件。</p>
 
     <textarea id="markdown-editor">{{RAW_MARKDOWN}}</textarea>
 
     <div class="btn-bar">
-      <button class="btn btn-primary" onclick="copyMarkdown()">复制修改后的内容</button>
-      <span class="feedback" id="copy-feedback">已复制到剪贴板！</span>
+      <button class="btn btn-primary" onclick="saveFile()">保存到本地</button>
+      <button class="btn btn-secondary" onclick="copyMarkdown()">复制</button>
+      <span class="feedback" id="save-feedback">已保存！</span>
     </div>
 
     <div class="hint-box">
       <strong>如何使用：</strong>
       <ol>
         <li>在上方文本框中编辑你的画像（支持 Markdown 语法）</li>
-        <li>点击"复制修改后的内容"按钮</li>
-        <li>回到 Claude Code 对话窗口，粘贴内容并发送</li>
-        <li>Agent 会自动应用你的修改</li>
+        <li>点击"保存到本地"按钮，选择覆盖 <code>USER.md</code></li>
+        <li>回到 Claude Code 对话窗口，回复 <code>已保存</code> 或 <code>确认提交</code></li>
+        <li>Agent 会读取最新文件内容并上传</li>
       </ol>
-      <p>或者直接回复 <code>确认提交</code> 保持当前版本不变。</p>
+      <p>如果浏览器不支持直接保存，会自动下载文件，请手动覆盖到原位置。</p>
     </div>
   </div>
 
   <script>
+    // 方案 1: FileSystem Access API（优先）
+    // 方案 2: 自动下载（降级）
+    async function saveFile() {
+      const content = document.getElementById('markdown-editor').value;
+      const blob = new Blob([content], { type: 'text/markdown' });
+
+      try {
+        // 优先尝试 FileSystem Access API
+        if ('showSaveFilePicker' in window) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'USER.md',
+            types: [{
+              description: 'Markdown',
+              accept: { 'text/markdown': ['.md'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          showFeedback('save-feedback', '已保存到本地文件！');
+          return;
+        }
+      } catch (err) {
+        // 用户取消或 API 失败，降级到下载
+        console.log('FileSystem API 不可用或用户取消，降级到下载');
+      }
+
+      // 降级方案：自动下载
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'USER.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showFeedback('save-feedback', '已下载 USER.md，请手动覆盖原文件');
+    }
+
     function copyMarkdown() {
       const textarea = document.getElementById('markdown-editor');
       textarea.select();
       try {
         document.execCommand('copy');
-        const feedback = document.getElementById('copy-feedback');
-        feedback.classList.add('show');
-        setTimeout(() => { feedback.classList.remove('show'); }, 2000);
+        showFeedback('save-feedback', '已复制到剪贴板！');
       } catch (err) {
         alert('复制失败，请手动按 Ctrl+C / Cmd+C 复制');
       }
+    }
+
+    function showFeedback(id, text) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => { el.classList.remove('show'); }, 3000);
     }
   </script>
 </body>
