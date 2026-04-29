@@ -74,14 +74,22 @@ ls ~/.hermes/memories/USER.md 2>/dev/null && echo "HAS_HERMES"
 
 如用户选择了其他 harness，依次征得同意并提取。
 
-### Step 4: 汇总去重
+### Step 4: 汇总去重与隐私过滤
 
 如使用了多个 harness 的信息来源，启动 subagent 并行分析，汇总所有要点，按 Section 归类并去重。
+
+**隐私过滤原则（强制）**：
+从 memory 提取时，必须过滤以下敏感信息，不得写入 USER.md：
+- **真实姓名** → 仅保留 nickname/化名
+- **公司/组织全称** → 可保留行业或领域描述（如"某 AI 创业公司"→"AI 领域"），不得保留具体公司名
+- **手机号、邮箱、身份证号** → 完全丢弃
+- **具体地址** → 仅保留城市级别（如"北京"、"上海"），丢弃街道/门牌号
+- **未公开的项目/客户名称** → 用泛化描述替代
 
 提取维度映射：
 - 用户技能、项目经验 → `# What I Can Offer`
 - 用户兴趣领域 → `# What I Do & Build`
-- 背景信息 → `# Identity`
+- 背景信息（昵称、角色、城市、MBTI 等） → `# Identity`
 - 工作风格和偏好 → `# My Style & Interests`
 
 ## 社交媒体补充（可选）
@@ -109,49 +117,13 @@ ls ~/.hermes/memories/USER.md 2>/dev/null && echo "HAS_HERMES"
 
 ## 生成 USER.md 草稿
 
-基于提取的信息，生成 `USER.md.draft`：
+基于提取的信息，生成 `USER.md.draft`。
 
-```markdown
----
-name: {{从 Identity 中提取的 nickname，或询问用户}}
-description: {{一句话自我介绍，基于 What I Do 生成}}
-rule: {{如有匹配规则，填写}}
-tags: [{{自动提取的关键词标签}}]
----
-
-# Identity
-_Who are you? Core identity, Background, location, MBTI._
-
-{{提取的信息，或占位符}}
-
-# What I Do & Build
-_What do you currently spend time on? Role, domain, topics, and recent focus. building or exploring?, collaborator needs, and project-specific asks_
-
-{{提取的信息，或占位符}}
-
-# What I Can Offer
-_What can you actively provide to others? Skills, expertise, resources, network, and time._
-
-{{提取的信息，或占位符}}
-
-# What I'm Looking For
-_What would make you say "yes" to a connection? Current matching intents, ideal people, opportunities, outcomes, and boundaries._
-
-{{提取的信息，或占位符}}
-
-# My Style & Interests
-_How do you prefer to connect and collaborate?. Availability, communication preferences, working style, constraints, and contact permissions._
-
-{{提取的信息，或占位符}}
-
-# Metadata & External Context
-_Profile version, generation info, data lineage, confirmation status, freshness, and visibility rules. What external evidence or context should be considered? Links, summaries, key takeaways, and source notes._
-
-- Version: draft-v1
-- Generated: {{timestamp}}
-- Sources: [{{memory 来源列表}}]
-- External Links: [{{社交媒体链接}}]
-```
+模板参见同目录下的 `user-profile-template.md`。生成时：
+- `Version` 填 `draft-v1`
+- `Confirmation Status` 填 `pending`
+- 所有占位符用提取到的内容填充，未提取到的保留占位符或留空
+- 严格遵守[隐私过滤原则](#step-4-汇总去重与隐私过滤)
 
 ## 输出
 
