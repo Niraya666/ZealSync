@@ -32,11 +32,23 @@ description: ZealSync onboarding 信息提取。检测当前 harness，读取已
 
 ### claude-code
 
-读取 `~/.claude/projects/` 下所有 project 类型的 memory 文件：
+**检测**：检查 `~/.claude/projects/` 目录是否存在。
 
+**提取前必须征得用户同意**：
+
+> "检测到你正在使用 claude-code。我可以读取你本地 `~/.claude/projects/` 下的 project 类型 memory 文件，从中提取你的技能、项目经验和兴趣领域来初始化画像。
+>
+> **是否同意读取？**（同意 / 跳过 / 只读取特定项目）"
+
+用户同意后，执行：
 ```bash
 find ~/.claude/projects -name "*.md" -path "*/memory/*" 2>/dev/null
 ```
+
+提取规则：
+- 只读取 `type: project` 的 memory（排除 `feedback`、`user` 等个人偏好）
+- 优先读取最近 90 天内的 memory
+- 使用 subagent 并行分析多个 memory 文件，每个文件提取与画像相关的要点
 
 提取维度：
 - 用户技能、项目经验 → `# What I Can Offer`
@@ -44,34 +56,33 @@ find ~/.claude/projects -name "*.md" -path "*/memory/*" 2>/dev/null
 - 踩坑记录中的背景信息 → `# Identity`
 - 工作风格和偏好 → `# My Style & Interests`
 
-提取规则：
-- 只读取 `type: project` 的 memory（排除 `feedback`、`user` 等个人偏好）
-- 优先读取最近 90 天内的 memory
-- 使用 subagent 并行分析多个 memory 文件，每个文件提取与画像相关的要点
-
 ### openClaw
 
-自动检查默认位置：`~/.openclaw/workspace/USER.md`
+**检测**：检查 `~/.openclaw/workspace/USER.md` 是否存在。
 
-- 文件存在 → 直接读取并解析
-- 文件不存在 → 询问用户："未在默认位置找到 openClaw 的 USER.md，是否提供了其他路径？"
+**提取前必须征得用户同意**：
 
-提取维度：
-- openClaw USER.md 中的画像信息 → 对应 Section
+> "检测到你可能使用 openClaw，默认画像位置为 `~/.openclaw/workspace/USER.md`。
+>
+> **是否同意读取作为初始化原料？**（同意 / 跳过）"
+
+用户同意后读取并解析，归入对应 Section。
 
 ### Hermes
 
-自动检查默认位置：`~/.hermes/memories/USER.md`
+**检测**：检查 `~/.hermes/memories/USER.md` 是否存在。
 
-- 文件存在 → 直接读取并解析
-- 文件不存在 → 询问用户："未在默认位置找到 Hermes 的 USER.md，是否提供了其他路径？"
+**提取前必须征得用户同意**：
 
-提取维度：
-- Hermes memory 中的画像信息 → 对应 Section
+> "检测到你可能使用 Hermes，默认画像位置为 `~/.hermes/memories/USER.md`。
+>
+> **是否同意读取作为初始化原料？**（同意 / 跳过）"
+
+用户同意后读取并解析，归入对应 Section。
 
 ### 多 Harness 并行分析
 
-如检测到多个 harness 的信息来源，启动多个 subagent 并行分析：
+如用户同意使用多个 harness 的信息来源，启动多个 subagent 并行分析：
 - Subagent A: 分析 claude-code memory → 输出要点
 - Subagent B: 分析 openClaw USER.md（`~/.openclaw/workspace/USER.md`） → 输出要点
 - Subagent C: 分析 Hermes USER.md（`~/.hermes/memories/USER.md`） → 输出要点

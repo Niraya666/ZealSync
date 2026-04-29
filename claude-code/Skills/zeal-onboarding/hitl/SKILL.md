@@ -117,32 +117,45 @@ lark-cli drive file list --params '{"folder_token":"root"}' --format pretty
 
 ### 6. 上传飞书文档
 
-用户确认后，执行上传：
+用户确认后，执行上传。注意以下要点：
+
+**路径规则**：必须使用**相对路径**，先 `cd` 到 USER.md 所在目录再执行命令。
 
 ```bash
+# 先进入文件所在目录（关键：lark-cli 要求相对路径）
+cd ./USER-profile/{{nickname}}
+
 # 创建飞书文档（默认上传到个人知识库）
 lark-cli docs +create \
   --api-version v2 \
   --title "ZealSync Profile — {{nickname}}" \
-  --content @./USER-profile/[nickname]/USER.md \
+  --content @USER.md \
   --doc-format markdown \
   --parent-position my_library
 ```
 
-如需上传到指定位置，替换 `--parent-position` 为对应的参数。
+如需上传到指定位置，替换 `--parent-position` 为对应的参数：
+- 指定文件夹：`--parent-token {{folder_token}}`
+- 指定 Wiki：`--wiki-space {{space_id}}`
 
-从输出中提取：
+**从输出中提取**：
 - `document_token` — 文档唯一标识
 - `url` — 文档访问链接
 
 如需要更新已存在的文档：
 ```bash
+cd ./USER-profile/{{nickname}}
 lark-cli docs +update \
   --api-version v2 \
   --doc {{document_token}} \
-  --markdown @./USER-profile/[nickname]/USER.md \
+  --markdown @USER.md \
   --mode overwrite
 ```
+
+**常见错误处理**：
+- `invalid file path` → 确认使用了相对路径 `@USER.md` 而非绝对路径
+- `Untitled` 文件名 → 确认传了 `--title` 参数
+- 文件未出现在预期位置 → 确认传了 `--parent-position` 或对应路径参数
 
 ### 7. 完成标记
 
