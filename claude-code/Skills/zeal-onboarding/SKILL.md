@@ -116,11 +116,4 @@ description: >
 
 ## YAML Frontmatter 格式
 
-```yaml
----
-name: {{nickname}}
-description: {{one-line self-intro}}
-rule: {{optional matching rule hints}}
-tags: [{{tag1}}, {{tag2}}, ...]
----
-```
+参见同目录下的 `user-profile-template.md` 模板文件。

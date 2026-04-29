@@ -15,136 +15,131 @@ description: ZealSync onboarding HITL 确认与提交。生成 HTML 预览，引
 
 ## 流程
 
-### 1. 生成 HTML 预览
+### 1. 启动本地保存服务（优先方案）
 
-将 `USER.md` 渲染为 HTML 文件。页面分为两部分：上半部分展示渲染后的画像，下半部分提供 Markdown 编辑区。
+**前置检测**：检查系统是否有 Python 3
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>ZealSync 画像预览 — {{nickname}}</title>
-  <style>
-    body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
-    h1 { border-bottom: 2px solid #0066ff; padding-bottom: 10px; }
-    h2 { color: #0066ff; margin-top: 30px; font-size: 1.2em; }
-    .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
-    .section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-    .pending { color: #999; font-style: italic; }
-    .tag { display: inline-block; background: #0066ff; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; margin: 2px; }
-    .editor-section { margin-top: 40px; border-top: 3px solid #0066ff; padding-top: 20px; }
-    .editor-section h2 { color: #333; margin-bottom: 10px; }
-    .editor-section p { color: #666; font-size: 0.9em; margin-bottom: 15px; }
-    textarea { width: 100%; min-height: 500px; font-family: 'Menlo', 'Monaco', monospace; font-size: 13px; line-height: 1.5; padding: 15px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; }
-    .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; margin-top: 15px; }
-    .btn-primary { background: #0066ff; color: white; }
-    .btn-secondary { background: #e0e0e0; color: #333; margin-right: 10px; }
-    .feedback { color: #28a745; margin-left: 10px; display: none; font-weight: 500; }
-    .hint-box { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; border-left: 4px solid #0066ff; }
-    .hint-box code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
-  </style>
-</head>
-<body>
-  <!-- 上半部分：渲染后的画像 -->
-  <h1>{{nickname}} 的社群画像</h1>
-  <div class="meta">{{description}} | 版本: v1.0.0 | 生成时间: {{timestamp}}</div>
-  <div class="tags">{{#each tags}}<span class="tag">{{this}}</span>{{/each}}</div>
-
-  <div class="section">
-    <h2>Identity</h2>
-    <div>{{identity_content}}</div>
-  </div>
-
-  <!-- 其他 Section 渲染类似 -->
-
-  <!-- 下半部分：Markdown 编辑区 -->
-  <div class="editor-section">
-    <h2>编辑画像（Markdown）</h2>
-    <p>直接在下方修改 Markdown 内容，改完后点击"复制"，然后粘贴回 Claude Code 对话中。</p>
-
-    <textarea id="markdown-editor">{{raw_markdown_content}}</textarea>
-
-    <div>
-      <button class="btn btn-primary" onclick="copyMarkdown()">复制修改后的内容</button>
-      <span class="feedback" id="copy-feedback">已复制到剪贴板！</span>
-    </div>
-
-    <div class="hint-box">
-      <strong>如何使用：</strong>
-      <ol>
-        <li>在上方文本框中编辑你的画像（支持 Markdown 语法）</li>
-        <li>点击"复制修改后的内容"按钮</li>
-        <li>回到 Claude Code 对话窗口，粘贴内容并发送</li>
-        <li>Agent 会自动应用你的修改</li>
-      </ol>
-      <p>或者直接回复 <code>确认提交</code> 保持当前版本不变。</p>
-    </div>
-  </div>
-
-  <script>
-    function copyMarkdown() {
-      const textarea = document.getElementById('markdown-editor');
-      textarea.select();
-      try {
-        document.execCommand('copy');
-        const feedback = document.getElementById('copy-feedback');
-        feedback.style.display = 'inline';
-        setTimeout(() => { feedback.style.display = 'none'; }, 2000);
-      } catch (err) {
-        alert('复制失败，请手动按 Ctrl+C / Cmd+C 复制');
-      }
-    }
-  </script>
-</body>
-</html>
-```
-
-保存到 `./USER-profile/[nickname]/hitl-preview.html`
-
-### 2. 打开浏览器
-
-运行：
 ```bash
-open ./USER-profile/[nickname]/hitl-preview.html
+which python3 || which python || echo "NO_PYTHON"
 ```
 
-### 3. 等待用户确认
+- **有 Python**：启动本地保存服务 `save-server.py`
+- **无 Python**：退回到方案 A（VS Code 直接编辑）
+
+**启动服务**：
+
+```bash
+# 启动后台 server，自动选择可用端口
+python3 ./claude-code/Skills/zeal-onboarding/hitl/save-server.py \
+  ./USER-profile/{{nickname}}/USER.md \
+  > /tmp/zeal-server-{{nickname}}.log 2>&1 &
+
+SERVER_PID=$!
+
+# 等待 server 启动并获取端口
+sleep 1
+SERVER_PORT=$(grep "SERVER_PORT:" /tmp/zeal-server-{{nickname}}.log | head -1 | cut -d: -f2)
+```
+
+**保存服务说明**：
+- 零第三方依赖，仅使用 Python 标准库
+- 监听随机可用端口，避免冲突
+- 接收 POST `/save` 请求，将内容写入指定文件路径
+- CORS 已配置，支持 file:// 页面的跨域请求
+
+**无 Python 时的降级方案**：
+
+如系统无 Python，跳过 HTML 预览，直接执行：
+
+```bash
+open ./USER-profile/{{nickname}}/USER.md
+```
+
+用户用系统默认编辑器（VS Code / Typora 等）编辑并保存后，回到对话中确认。
+
+### 2. 生成 HTML 预览
+
+**模板文件位置**：`hitl/hitl-template.html`
+
+**生成流程**：
+
+1. 读取模板文件 `hitl/hitl-template.html`
+2. 替换占位符：
+
+| 占位符 | 替换内容 |
+|---|---|
+| `{{NICKNAME}}` | 用户昵称 |
+| `{{DESCRIPTION}}` | YAML frontmatter 中的 description |
+| `{{TIMESTAMP}}` | 当前时间 |
+| `{{TAGS_HTML}}` | 标签渲染为 `<span class="tag">...</span>` |
+| `{{SECTIONS_HTML}}` | 各 Section 渲染为 `<div class="section">...</div>` |
+| `{{RAW_MARKDOWN}}` | 完整的 USER.md Markdown 原文 |
+| `{{SERVER_PORT}}` | 本地保存服务的端口号 |
+
+3. 保存到 `./USER-profile/[nickname]/hitl-preview.html`
+
+**Section 渲染规则**：
+
+将 USER.md 中每个 Section 转换为 HTML：
+```html
+<div class="section">
+  <h2>Section 标题</h2>
+  <div>Section 内容（Markdown 转 HTML）</div>
+</div>
+```
+
+- 空内容显示为 `<span class="pending">待补充</span>`
+- 列表保持 `<ul>` / `<li>` 结构
+- 代码块用 `<pre>` 包裹
+
+**保存交互逻辑**：
+
+浏览器中的"保存"按钮执行：
+1. `fetch('http://localhost:{{SERVER_PORT}}/save')` POST 修改后的内容
+2. Server 直接写入 `./USER-profile/{{nickname}}/USER.md`
+3. 无路径选择弹窗，一键保存到默认位置
+4. 如 server 不可用，自动降级为文件下载
+
+### 3. 打开浏览器
+
+```bash
+open ./USER-profile/{{nickname}}/hitl-preview.html
+```
+
+### 4. 等待用户确认
 
 在对话中询问：
 
 > 已在浏览器中打开你的画像预览，底部提供了 Markdown 编辑区。
 >
-> **确认方式（三选一）**：
-> 1. 回复 **"确认提交"** — 保持当前版本直接上传
-> 2. **粘贴修改后的完整 Markdown** — 在浏览器中编辑后复制，粘贴回对话
-> 3. 回复 **"需要修改：[具体描述]"** — 告诉我改哪里，我来帮你改
+> **操作方式**：
+> 1. 在浏览器中直接编辑，点击"保存"自动覆盖 `USER.md`
+> 2. 回到对话中回复 **"已保存"** 或 **"确认提交"**
+> 3. 如需 Agent 帮忙修改，回复 **"需要修改：[具体描述]"**
 
-### 4. 处理用户输入
+### 5. 处理用户输入
 
-**情况 A：用户回复 "确认提交"**
-→ 直接进入 Step 5（选择上传位置）
+**情况 A：用户回复 "确认提交" 或 "已保存"**
+→ 读取 `./USER-profile/[nickname]/USER.md` 最新内容
+→ 关闭本地保存服务：`kill $SERVER_PID`
+→ 进入 Step 6（选择上传位置）
 
-**情况 B：用户粘贴了完整 Markdown**
-→ 检测到输入内容包含 YAML frontmatter（`---`）和 Section headers：
-1. 将粘贴的内容覆盖写入 `USER.md`
-2. 向用户确认："检测到完整的画像内容，是否以此版本提交？"
-3. 用户确认后进入 Step 5
-
-**情况 C：用户描述具体修改（如"What I'm Looking For 里加上 xxx"）**
+**情况 B：用户描述具体修改**
 → 直接在 `USER.md` 中应用修改
 → 重新生成 HTML 预览
 → 再次打开浏览器等待确认
-→ 最多允许 **3 轮修改**，超过则建议完成后再更新
+→ 最多允许 **3 轮修改**
 
-### 5. 选择上传位置
+### 6. 选择上传位置
 
-在确认提交前，询问用户希望上传到飞书的哪个位置：
+**默认策略**：优先使用「个人知识库」(`--parent-position my_library`)，避免额外 OAuth scope 授权。
+
+在确认提交前询问：
 
 > 你希望将画像上传到飞书的哪个位置？
-> 1. **个人知识库**（默认，我的空间 › 知识库）
-> 2. **指定文件夹**（提供 folder token）
-> 3. **指定 Wiki 空间**（提供 space ID）
+> 1. **个人知识库**（推荐默认，无需额外授权）
+> 2. **指定文件夹**（需 `space:document:retrieve` scope，可能触发额外授权）
+> 3. **指定 Wiki 空间**（需 space ID）
 
 根据用户选择：
 
@@ -154,59 +149,85 @@ open ./USER-profile/[nickname]/hitl-preview.html
 | 指定文件夹 | `--parent-token {{folder_token}}` |
 | 指定 Wiki | `--wiki-space {{space_id}}` |
 
-如用户选择了文件夹或 Wiki 但无法提供 token，先执行：
+如用户选择了文件夹但无法提供 token，执行：
 ```bash
-# 搜索可用的 Wiki 空间
-lark-cli wiki spaces list --format pretty
-
-# 或搜索文件夹
-lark-cli drive file list --params '{"folder_token":"root"}' --format pretty
+# 搜索可用的文件夹
+lark-cli drive files list --params '{"folder_token":"root"}' --format pretty
 ```
 
-### 6. 上传飞书文档
+### 7. 构造上传文件
 
-用户确认后，执行上传。注意以下要点：
+Lark v2 API 不支持 `--title` 参数，需通过 content 中的 H1 设置文档标题。同时，YAML frontmatter 会被 Lark 解析为正文内容，上传前需剥离。
 
-**路径规则**：必须使用**相对路径**，先 `cd` 到 USER.md 所在目录再执行命令。
+**构造步骤**：
 
 ```bash
-# 先进入文件所在目录（关键：lark-cli 要求相对路径）
 cd ./USER-profile/{{nickname}}
 
-# 创建飞书文档（默认上传到个人知识库）
+# Step 1: 剥离 frontmatter，添加 H1 标题
+python3 -c "
+import re
+with open('USER.md', 'r') as f:
+    content = f.read()
+
+# 去掉 frontmatter
+content = re.sub(r'^---\n.*?\n---\n+', '', content, flags=re.DOTALL)
+
+# 在开头添加 H1 标题
+content = '# ZealSync Profile — {{nickname}}\n\n' + content
+
+with open('USER-lark.md', 'w') as f:
+    f.write(content)
+"
+```
+
+生成的 `USER-lark.md`：
+- 不含 YAML frontmatter
+- 以 `# Title` 开头，作为文档显示标题
+- 保留所有 Section 正文
+
+### 8. 上传飞书文档
+
+**路径规则**：使用相对路径，先 `cd` 到文件所在目录。
+
+```bash
+cd ./USER-profile/{{nickname}}
+
+# 创建飞书文档
 lark-cli docs +create \
   --api-version v2 \
-  --title "ZealSync Profile — {{nickname}}" \
-  --content @USER.md \
+  --content @USER-lark.md \
   --doc-format markdown \
   --parent-position my_library
 ```
 
-如需上传到指定位置，替换 `--parent-position` 为对应的参数：
-- 指定文件夹：`--parent-token {{folder_token}}`
-- 指定 Wiki：`--wiki-space {{space_id}}`
+**设置文档元数据标题**（文档列表、浏览器标签中显示）：
+```bash
+# 获取 document_token 从上一步输出
+lark-cli drive files patch \
+  --params '{"file_token":"DOC_TOKEN","type":"docx"}' \
+  --data '{"new_title":"ZealSync Profile — {{nickname}}"}' \
+  --yes
+```
 
-**从输出中提取**：
-- `document_token` — 文档唯一标识
-- `url` — 文档访问链接
-
-如需要更新已存在的文档：
+**如需更新已存在的文档**：
 ```bash
 cd ./USER-profile/{{nickname}}
 lark-cli docs +update \
   --api-version v2 \
   --doc {{document_token}} \
-  --markdown @USER.md \
+  --markdown @USER-lark.md \
   --mode overwrite
 ```
 
 **常见错误处理**：
-- `invalid file path` → 确认使用了相对路径 `@USER.md` 而非绝对路径
-- `Untitled` 文件名 → 确认传了 `--title` 参数
-- 文件未出现在预期位置 → 确认传了 `--parent-position` 或对应路径参数
+- `invalid file path` → 确认使用了相对路径 `@USER-lark.md` 而非绝对路径
+- `Untitled` 文件名 → 确认 `USER-lark.md` 以 `# Title` 开头
+- 权限不足 → 如使用「指定文件夹」，运行 `lark-cli auth login --scope "space:document:retrieve"` 补充授权
 
-### 7. 完成标记
+### 9. 完成标记
 
+- 关闭本地保存服务（如仍在运行）：`kill $SERVER_PID 2>/dev/null || true`
 - 将文档 URL 记录到 `.state.json`
 - 更新 `USER.md` 中的 Metadata：
   - `Confirmation Status: confirmed`

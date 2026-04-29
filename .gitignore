@@ -15,6 +15,13 @@ Thumbs.db
 *.swp
 *.swo
 
+# Project docs (local only)
+docs/
+.docs/
+
+# User-generated data (onboarding profiles)
+USER-profile/
+
 # Temporary files
 *.tmp
 *.log

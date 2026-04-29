@@ -38,6 +38,21 @@ ZealSync/
 @.claude/rules/git-workflow.md
 @.claude/rules/memory-usage.md
 
+## Feishu (Lark) Integration Notes
+
+When uploading documents via `lark-cli`:
+
+- **v2 API has no `--title` flag**: Document title must be set via H1 in the Markdown content body. After creation, use `lark-cli drive files patch` with `"new_title":"..."` to set the metadata title (visible in doc lists and browser tabs).
+- **Strip YAML frontmatter before upload**: Lark v2 Markdown parser treats `---` delimiters as content blocks, rendering frontmatter as an h2 heading. Always construct a separate upload file with frontmatter removed.
+- **Prefer personal library to reduce OAuth friction**: Default to `--parent-position my_library`. Only request `space:document:retrieve` scope when the user explicitly chooses to upload to a specific folder.
+- **Use relative paths with `@` prefix**: When passing files to `lark-cli docs +create`, use `--content @USER-lark.md` after `cd` into the target directory. Absolute paths often cause `invalid file path` errors.
+
+## File Path & CWD Best Practices
+
+- **Be explicit about working directory**: Commands that `cd` into subdirectories must either use absolute paths for all subsequent file operations, or `cd` back afterward.
+- **Avoid `cd` when possible**: Prefer absolute paths in arguments over changing the working directory mid-script.
+- **State mutations must be atomic**: If a step creates a temporary file for upload, clean it up or keep it in a well-known temp location (e.g., `/tmp/` or a local `.tmp/`).
+
 ## Principles
 
 - **MVP First**: Phase-0 只做最核心的信息整合获取，不扩展边缘功能
