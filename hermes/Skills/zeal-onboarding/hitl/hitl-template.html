@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZealSync 画像预览 — {{NICKNAME}}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #333;
+      background: #fafafa;
+    }
+    h1 {
+      border-bottom: 3px solid #0066ff;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.95em;
+      margin-bottom: 20px;
+    }
+    .tags {
+      margin-bottom: 24px;
+    }
+    .tag {
+      display: inline-block;
+      background: #0066ff;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.85em;
+      margin: 4px 4px 4px 0;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .section h2 {
+      color: #0066ff;
+      margin-top: 0;
+      font-size: 1.15em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+    .section pre {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+    .section ul {
+      padding-left: 20px;
+    }
+    .section li {
+      margin: 6px 0;
+    }
+    .pending {
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Editor Section */
+    .editor-section {
+      margin-top: 40px;
+      border-top: 3px solid #0066ff;
+      padding-top: 24px;
+    }
+    .editor-section h2 {
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 1.2em;
+    }
+    .editor-desc {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 16px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 500px;
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: vertical;
+      background: white;
+    }
+    .btn-bar {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background: #0066ff;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0052cc;
+    }
+    .feedback {
+      color: #28a745;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feedback.show {
+      opacity: 1;
+    }
+    .hint-box {
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: #e7f3ff;
+      border-radius: 8px;
+      border-left: 4px solid #0066ff;
+    }
+    .hint-box ol {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+    .hint-box li {
+      margin: 4px 0;
+    }
+    .hint-box code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- 上半部分：渲染后的画像 -->
+  <h1>{{NICKNAME}} 的社群画像</h1>
+  <div class="subtitle">{{DESCRIPTION}} | 版本: v1.0.0 | 生成时间: {{TIMESTAMP}}</div>
+  <div class="tags">{{TAGS_HTML}}</div>
+
+  {{SECTIONS_HTML}}
+
+  <!-- 下半部分：Markdown 编辑区 -->
+  <div class="editor-section">
+    <h2>编辑画像（Markdown）</h2>
+    <p class="editor-desc">直接在下方修改 Markdown 内容，改完后点击"保存"直接覆盖本地文件。</p>
+
+    <textarea id="markdown-editor">{{RAW_MARKDOWN}}</textarea>
+
+    <div class="btn-bar">
+      <button class="btn btn-primary" onclick="saveFile()">保存到本地</button>
+      <button class="btn btn-secondary" onclick="copyMarkdown()">复制</button>
+      <span class="feedback" id="save-feedback">已保存！</span>
+    </div>
+
+    <div class="hint-box">
+      <strong>如何使用：</strong>
+      <ol>
+        <li>在上方文本框中编辑你的画像（支持 Markdown 语法）</li>
+        <li>点击"保存"按钮，自动覆盖 <code>USER.md</code></li>
+        <li>回到 Hermes 对话中回复 <code>已保存</code> 或 <code>确认提交</code></li>
+        <li>Agent 会读取最新文件内容并上传飞书</li>
+      </ol>
+      <p>如果保存失败，会自动下载文件到下载目录，请手动覆盖到原位置。</p>
+    </div>
+  </div>
+
+  <script>
+    // 本地保存服务端点（由 skill 启动时注入）
+    const SAVE_URL = 'http://localhost:{{SERVER_PORT}}/save';
+
+    // 方案 1: POST 到本地 server（优先，无路径选择弹窗）
+    // 方案 2: 自动下载（降级）
+    async function saveFile() {
+      const content = document.getElementById('markdown-editor').value;
+
+      try {
+        // 优先尝试 POST 到本地 server
+        const response = await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: content })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.ok) {
+            showFeedback('save-feedback', '已保存到 ' + result.path);
+            return;
+          }
+        }
+        throw new Error('Server response not ok');
+      } catch (err) {
+        console.log('本地保存服务不可用，降级到下载:', err);
+        downloadFile(content);
+      }
+    }
+
+    function downloadFile(content) {
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'USER.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showFeedback('save-feedback', '已下载 USER.md，请手动覆盖原文件');
+    }
+
+    function copyMarkdown() {
+      const textarea = document.getElementById('markdown-editor');
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showFeedback('save-feedback', '已复制到剪贴板！');
+      } catch (err) {
+        alert('复制失败，请手动按 Ctrl+C / Cmd+C 复制');
+      }
+    }
+
+    function showFeedback(id, text) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => { el.classList.remove('show'); }, 3000);
+    }
+  </script>
+</body>
+</html>
