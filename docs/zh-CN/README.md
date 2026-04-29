@@ -44,7 +44,7 @@ ZealSync/
 │   └── Skills/
 │       └── zeal-onboarding/        # Hermes 版 onboarding skill
 ├── codex/                          # codex harness skills（预留）
-├── openClaw/                       # openClaw harness skills（预留）
+├── openclaw/                       # OpenClaw harness skills
 ├── .claude/rules/                  # 开发规范
 ├── .docs/                          # 设计文档与经验总结
 └── USER-profile/                   # 用户画像输出目录
@@ -103,11 +103,25 @@ hermes -s zeal-onboarding
 /skill zeal-onboarding
 ```
 
+### OpenClaw
+
+```bash
+# 复制 skill 到 OpenClaw 的 skills 目录
+cp -r ./openclaw/Skills/zeal-onboarding \
+      ~/.openclaw/workspace/skills/zeal-onboarding
+```
+
+触发方式：在 OpenClaw 对话中输入任意触发词
+- "帮我创建社群画像"
+- "生成 USER.md"
+- "ZealSync onboarding"
+- "我要加入社群"
+
+**OpenClaw 特性**：
+- 对话交互：自然对话（无需显式工具调用）
+- Memory 读取：直接文件读取 `~/.openclaw/workspace/` + `memory_search`/`memory_get` 搜索补充
+
 ### Codex（预留）
-
-尚未适配，欢迎贡献。
-
-### OpenClaw（预留）
 
 尚未适配，欢迎贡献。
 
@@ -132,3 +146,4 @@ hermes -s zeal-onboarding
 ## 相关文档
 
 - [MIGRATION-NOTES.md](../../hermes/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Hermes 迁移说明
+- [MIGRATION-NOTES.md](../../openclaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw 迁移说明
