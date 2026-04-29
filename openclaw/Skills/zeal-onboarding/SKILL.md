@@ -64,7 +64,7 @@ description: >
 
 - 检测当前 harness（通过环境变量或会话特征判断）
 - 询问用户是否愿意提供其他 harness 的 memory 作为初始化原料
-- 从各 harness 的 memory 中提取已有用户信息（OpenClaw 通过 `memory_search` 和 `memory_get` 工具读取历史记忆）
+- 从各 harness 的 memory 中提取已有用户信息（OpenClaw 优先直接读取 `~/.openclaw/workspace/` 下的文件，辅以 memory 工具搜索补充）
 - 可选：询问社交媒体链接，使用 subagent 抓取并摘要
 - 输出：初步的 USER.md 草稿（YAML frontmatter + 各 Section 内容）
 - 保存草稿到 `./USER-profile/[nickname]/USER.md.draft`

@@ -47,11 +47,11 @@ lark-cli 的安装和认证检查完全通用，无需修改。
   - 添加 "存在 `~/.openclaw/workspace/` 目录、支持 `memory_search` / `memory_get` 工具"
 - Memory 提取表: 添加 OpenClaw 行
   - 来源: `~/.openclaw/workspace/USER.md` + `memory/*.md`
-  - 提取方式: `memory_search` / `memory_get` 工具（而非直接文件读取或 Hermes 工具）
+  - 提取方式: **文件直接读取（优先）**，辅以 `memory_search` / `memory_get` 工具
   - 内容: 用户画像、记忆、历史上下文
 - 新增 "OpenClaw 特殊说明" 段落
-  - 说明 OpenClaw 的 memory 系统通过工具访问
-  - 列出具体工具: `memory_search(query="...")` 和 `memory_get(path="...")`
+  - 说明 OpenClaw 可直接读取文件，与 Hermes 必须通过工具访问不同
+  - 列出具体方式: `read()` 直接读取 + `memory_search()` / `memory_get()` 搜索补充
 
 **可直接移植**: harness 检测逻辑、隐私过滤原则、社交媒体补充策略、草稿生成逻辑
 
@@ -90,7 +90,7 @@ lark-cli 的安装和认证检查完全通用，无需修改。
 | 方面 | Hermes | OpenClaw |
 |---|---|---|
 | 对话收集 | `clarify` (显式 tool call) | 自然对话（用户直接回复） |
-| Memory 读取 | `memory` / `session_search` 工具 | `memory_search` / `memory_get` 工具 |
+| Memory 读取 | `memory` / `session_search` 工具 | **文件直接读取** + `memory_search` / `memory_get` 工具补充 |
 | Skill 格式 | Markdown + YAML frontmatter | Markdown + YAML frontmatter (相同) |
 | 路径结构 | `~/.hermes/skills/` | `~/.openclaw/workspace/skills/` |
 | HTML 预览 | 通用 | 通用（仅需修改提示文本） |
@@ -112,7 +112,7 @@ OpenClaw 会自动识别 skills 目录下的 skill，无需额外加载命令。
 | 方面 | Claude-code | OpenClaw |
 |---|---|---|
 | 对话收集 | `AskUserQuestion` (内置函数) | 自然对话（直接交互） |
-| Memory 读取 | 直接文件系统读取 | `memory_search` / `memory_get` 工具 |
+| Memory 读取 | 直接文件系统读取 | **文件直接读取** + `memory_search` / `memory_get` 工具补充 |
 | Skill 格式 | Markdown + YAML frontmatter | Markdown + YAML frontmatter (相同) |
 
 OpenClaw 版本在对话交互方式上与 claude-code 更接近（都是直接对话，而非显式工具调用），但在 memory 读取方式上与 Hermes 更接近（都使用工具而非直接文件读取）。

@@ -56,16 +56,18 @@ ls ~/.hermes/memories/ 2>/dev/null && echo "HAS_HERMES"
 | Harness | 提取来源 | 提取方式 | 提取内容 |
 |---|---|---|---|
 | **claude-code** | `~/.claude/projects/**/memory/*.md`（`type: project`） | 文件读取 | 技能、项目经验、兴趣、工作风格 |
-| **openClaw** | `~/.openclaw/workspace/USER.md` + `memory/*.md` | `memory_search` / `memory_get` 工具 | 用户画像、记忆、历史上下文 |
+| **openClaw** | `~/.openclaw/workspace/USER.md` + `memory/*.md` | 文件直接读取（优先），辅以 `memory_search` / `memory_get` | 用户画像、记忆、历史上下文 |
 | **Hermes** | `~/.hermes/memories/` 下的记忆文件 + 历史会话 | `memory` / `session_search` 工具 | 用户偏好、项目经验、兴趣、工作风格 |
 
 **OpenClaw 特殊说明**：
 
-OpenClaw 的 memory 系统通过工具访问：
-- 使用 `memory_search(query="...")` 搜索历史记忆
-- 使用 `memory_get(path="...")` 读取特定记忆文件
-- 使用 `read(path="~/.openclaw/workspace/USER.md")` 读取用户画像
+OpenClaw 的 memory 文件可以直接读取，无需显式工具调用：
+- 使用 `read(path="~/.openclaw/workspace/USER.md")` 直接读取用户画像
+- 使用 `read(path="~/.openclaw/workspace/memory/*.md")` 读取历史记忆
+- 辅以 `memory_search(query="...")` 和 `memory_get(path="...")` 搜索补充遗漏信息
 - 提取时注意过滤敏感信息，仅保留可用于画像构建的内容
+
+这与 Hermes 不同 —— Hermes 必须通过 `memory` / `session_search` 工具访问记忆，而 OpenClaw 的文件系统可直接访问。
 
 ### Step 3: 提取其他 Harness 的 Memory
 
