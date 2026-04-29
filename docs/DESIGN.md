@@ -177,7 +177,7 @@ Onboarding 的核心是一个持久化状态机：
 |---|---|---|
 | claude-code | 文件系统读取 | `~/.claude/projects/**/memory/*.md` |
 | Hermes | 工具调用 | `memory(action="read")` + `session_search(query="...")` |
-| openClaw | 文件系统读取 | `~/.openclaw/workspace/USER.md` |
+| openClaw | 文件系统读取 + 工具搜索补充 | 直接读取 `~/.openclaw/workspace/`，辅以 `memory_search`/`memory_get` |
 
 **隐私过滤（强制）**：
 - 真实姓名 → 仅保留 nickname
@@ -209,6 +209,7 @@ Onboarding 的核心是一个持久化状态机：
 |---|---|---|
 | claude-code | `AskUserQuestion` | 内置函数式调用，Agent 直接提问 |
 | Hermes | `clarify` | 显式 tool call，支持多选/开放式 |
+| openClaw | 自然对话 | 直接对话交互，用户直接回复 |
 
 **跳过策略**：每轮必须提供"跳过"选项，用户跳过的 Section 在最终 USER.md 中标记为 `[待补充]`。
 
@@ -287,14 +288,14 @@ tags: [auto-generated tags]
 | claude-code | ✅ 已完成 | `AskUserQuestion` 对话，文件系统读 memory |
 | Hermes | ✅ 已完成 | `clarify` 工具对话，`memory`/`session_search` 读 memory |
 | Codex | ⏳ 预留 | 待适配 |
-| OpenClaw | ⏳ 预留 | 待适配 |
+| openClaw | ✅ 已完成 | 自然对话，`memory_search`/`memory_get` 读 memory，文件直接读取 |
 
 ### 3.3 迁移检查清单
 
 将 skill 从 harness A 迁移到 harness B 时，重点检查：
 
 - [ ] **对话工具**：`AskUserQuestion` → `clarify` 或其他等价工具
-- [ ] **Memory 读取**：文件系统 → 工具调用，或反之
+- [ ] **Memory 读取**：文件系统 → 工具调用，或反之（openClaw 为文件直接读取 + `memory_search`/`memory_get` 补充）
 - [ ] **路径引用**：`<harness-a>/Skills/...` → `<harness-b>/Skills/...`
 - [ ] **提示文本**：Harness 名称在 HTML 模板和对话中的引用
 - [ ] **Eval 期望**：测试用例中的 harness 检测和工具调用描述
@@ -355,13 +356,14 @@ tags: [auto-generated tags]
 | Git 工作流 | `.claude/rules/git-workflow.md` | 分支策略、提交规范 |
 | Memory 使用规范 | `.claude/rules/memory-usage.md` | 记忆持久化规则 |
 | Hermes 迁移说明 | `hermes/Skills/zeal-onboarding/MIGRATION-NOTES.md` | 具体迁移改动分析 |
+| OpenClaw 迁移说明 | `openclaw/Skills/zeal-onboarding/MIGRATION-NOTES.md` | 具体迁移改动分析 |
 | Onboarding 踩坑记录 | `.docs/LESSON-LEARN-onboarding.md` | 首次端到端执行的经验总结 |
 
 ### 5.2 术语表
 
 | 术语 | 含义 |
 |---|---|
-| **Harness** | Agent 运行环境/框架（如 Claude Code、Hermes、Codex） |
+| **Harness** | Agent 运行环境/框架（如 Claude Code、Hermes、OpenClaw、Codex） |
 | **Skill** | 封装的可复用 Agent 能力模块，包含触发条件、流程和工具调用 |
 | **HITL** | Human-in-the-Loop，人机协同，在关键节点由人类确认 |
 | **USER.md** | 标准化的用户画像文件，YAML frontmatter + Markdown 正文 |
