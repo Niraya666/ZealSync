@@ -49,20 +49,32 @@ find ~/.claude/projects -name "*.md" -path "*/memory/*" 2>/dev/null
 - 优先读取最近 90 天内的 memory
 - 使用 subagent 并行分析多个 memory 文件，每个文件提取与画像相关的要点
 
-### openClaw / Hermes
+### openClaw
 
-询问用户：
-- "你是否有 openClaw 的 USER.md 或 MEMORY.md？如有，请提供文件路径。"
-- "你是否有 Hermes 的画像文件？如有，请提供文件路径。"
+自动检查默认位置：`~/.openclaw/workspace/USER.md`
 
-如用户提供了路径，直接读取并解析。
+- 文件存在 → 直接读取并解析
+- 文件不存在 → 询问用户："未在默认位置找到 openClaw 的 USER.md，是否提供了其他路径？"
+
+提取维度：
+- openClaw USER.md 中的画像信息 → 对应 Section
+
+### Hermes
+
+自动检查默认位置：`~/.hermes/memories/USER.md`
+
+- 文件存在 → 直接读取并解析
+- 文件不存在 → 询问用户："未在默认位置找到 Hermes 的 USER.md，是否提供了其他路径？"
+
+提取维度：
+- Hermes memory 中的画像信息 → 对应 Section
 
 ### 多 Harness 并行分析
 
-如用户愿意提供多个 harness 的信息，启动多个 subagent 并行分析：
+如检测到多个 harness 的信息来源，启动多个 subagent 并行分析：
 - Subagent A: 分析 claude-code memory → 输出要点
-- Subagent B: 分析 openClaw USER.md → 输出要点
-- Subagent C: 分析 Hermes memory → 输出要点
+- Subagent B: 分析 openClaw USER.md（`~/.openclaw/workspace/USER.md`） → 输出要点
+- Subagent C: 分析 Hermes USER.md（`~/.hermes/memories/USER.md`） → 输出要点
 
 汇总所有要点，去重后按 Section 归类。
 
@@ -70,7 +82,7 @@ find ~/.claude/projects -name "*.md" -path "*/memory/*" 2>/dev/null
 
 询问用户是否愿意提供社交媒体链接来丰富画像：
 
-> "我可以帮你从外部社交媒体抓取公开信息来补充画像。是否愿意提供以下任意链接？
+> "你可以提供社交媒体链接，作为画像的外部参考。是否愿意提供以下任意链接？
 > - 小红书主页
 > - LinkedIn 个人页
 > - 个人博客
@@ -78,12 +90,16 @@ find ~/.claude/projects -name "*.md" -path "*/memory/*" 2>/dev/null
 > - GitHub 主页
 > - Twitter/X 主页"
 
-对每个提供的链接：
-1. 使用 `WebFetch` 抓取页面内容
-2. Subagent 提取关键信息（职业、技能、兴趣、项目）
-3. 归入对应 Section，标记为 `[来自外部抓取]`
+**MVP 版本策略**：只保留链接，不做抓取。
 
-MVP 版本：只抓取，不做深度验证，信息归入 `# Metadata & External Context`
+原因：
+- `WebFetch` 面临反爬机制，稳定性和成功率不可控
+- MVP 阶段优先保证核心流程可用，外部信息抓取延后到 Phase-1
+
+处理方式：
+- 收集用户提供的所有链接
+- 将链接原样归入 `# Metadata & External Context` 的 `External Links` 列表
+- 标记为 `[用户提供的参考链接，待后续抓取]`
 
 ## 生成 USER.md 草稿
 

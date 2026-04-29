@@ -89,18 +89,47 @@ open ./USER-profile/[nickname]/hitl-preview.html
 - 再次打开浏览器等待确认
 - 最多允许 **3 轮修改**，超过则建议完成后再更新
 
-### 5. 上传飞书文档
+### 5. 选择上传位置
+
+在确认提交前，询问用户希望上传到飞书的哪个位置：
+
+> 你希望将画像上传到飞书的哪个位置？
+> 1. **个人知识库**（默认，我的空间 › 知识库）
+> 2. **指定文件夹**（提供 folder token）
+> 3. **指定 Wiki 空间**（提供 space ID）
+
+根据用户选择：
+
+| 选项 | 命令参数 |
+|---|---|
+| 个人知识库 | `--parent-position my_library` |
+| 指定文件夹 | `--parent-token {{folder_token}}` |
+| 指定 Wiki | `--wiki-space {{space_id}}` |
+
+如用户选择了文件夹或 Wiki 但无法提供 token，先执行：
+```bash
+# 搜索可用的 Wiki 空间
+lark-cli wiki spaces list --format pretty
+
+# 或搜索文件夹
+lark-cli drive file list --params '{"folder_token":"root"}' --format pretty
+```
+
+### 6. 上传飞书文档
 
 用户确认后，执行上传：
 
 ```bash
-# 创建飞书文档
+# 创建飞书文档（默认上传到个人知识库）
 lark-cli docs +create \
   --api-version v2 \
   --title "ZealSync Profile — {{nickname}}" \
   --content @./USER-profile/[nickname]/USER.md \
-  --doc-format markdown
+  --doc-format markdown \
+  --parent-position my_library
 ```
+
+如需上传到指定位置，替换 `--parent-position` 为对应的参数。
 
 从输出中提取：
 - `document_token` — 文档唯一标识
@@ -115,7 +144,7 @@ lark-cli docs +update \
   --mode overwrite
 ```
 
-### 6. 完成标记
+### 7. 完成标记
 
 - 将文档 URL 记录到 `.state.json`
 - 更新 `USER.md` 中的 Metadata：
