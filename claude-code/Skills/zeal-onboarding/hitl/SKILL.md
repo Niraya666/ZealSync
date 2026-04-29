@@ -17,90 +17,41 @@ description: ZealSync onboarding HITL 确认与提交。生成 HTML 预览，引
 
 ### 1. 生成 HTML 预览
 
-将 `USER.md` 渲染为 HTML 文件。页面分为两部分：上半部分展示渲染后的画像，下半部分提供 Markdown 编辑区。
+**模板文件位置**：`hitl/hitl-template.html`（与 `SKILL.md` 同级目录）
 
+**生成流程**：
+
+1. 读取模板文件 `hitl/hitl-template.html`
+2. 替换以下占位符：
+
+| 占位符 | 替换内容 |
+|---|---|
+| `{{NICKNAME}}` | 用户昵称 |
+| `{{DESCRIPTION}}` | YAML frontmatter 中的 description |
+| `{{TIMESTAMP}}` | 当前时间 |
+| `{{TAGS_HTML}}` | 标签渲染为 `<span class="tag">...</span>` |
+| `{{SECTIONS_HTML}}` | 各 Section 渲染为 `<div class="section">...</div>` |
+| `{{RAW_MARKDOWN}}` | 完整的 USER.md Markdown 原文（用于 textarea） |
+
+3. 保存到 `./USER-profile/[nickname]/hitl-preview.html`
+
+**Section 渲染规则**：
+
+将 USER.md 中每个 Section 转换为 HTML：
 ```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>ZealSync 画像预览 — {{nickname}}</title>
-  <style>
-    body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
-    h1 { border-bottom: 2px solid #0066ff; padding-bottom: 10px; }
-    h2 { color: #0066ff; margin-top: 30px; font-size: 1.2em; }
-    .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
-    .section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-    .pending { color: #999; font-style: italic; }
-    .tag { display: inline-block; background: #0066ff; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; margin: 2px; }
-    .editor-section { margin-top: 40px; border-top: 3px solid #0066ff; padding-top: 20px; }
-    .editor-section h2 { color: #333; margin-bottom: 10px; }
-    .editor-section p { color: #666; font-size: 0.9em; margin-bottom: 15px; }
-    textarea { width: 100%; min-height: 500px; font-family: 'Menlo', 'Monaco', monospace; font-size: 13px; line-height: 1.5; padding: 15px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; }
-    .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; margin-top: 15px; }
-    .btn-primary { background: #0066ff; color: white; }
-    .btn-secondary { background: #e0e0e0; color: #333; margin-right: 10px; }
-    .feedback { color: #28a745; margin-left: 10px; display: none; font-weight: 500; }
-    .hint-box { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; border-left: 4px solid #0066ff; }
-    .hint-box code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
-  </style>
-</head>
-<body>
-  <!-- 上半部分：渲染后的画像 -->
-  <h1>{{nickname}} 的社群画像</h1>
-  <div class="meta">{{description}} | 版本: v1.0.0 | 生成时间: {{timestamp}}</div>
-  <div class="tags">{{#each tags}}<span class="tag">{{this}}</span>{{/each}}</div>
-
-  <div class="section">
-    <h2>Identity</h2>
-    <div>{{identity_content}}</div>
-  </div>
-
-  <!-- 其他 Section 渲染类似 -->
-
-  <!-- 下半部分：Markdown 编辑区 -->
-  <div class="editor-section">
-    <h2>编辑画像（Markdown）</h2>
-    <p>直接在下方修改 Markdown 内容，改完后点击"复制"，然后粘贴回 Claude Code 对话中。</p>
-
-    <textarea id="markdown-editor">{{raw_markdown_content}}</textarea>
-
-    <div>
-      <button class="btn btn-primary" onclick="copyMarkdown()">复制修改后的内容</button>
-      <span class="feedback" id="copy-feedback">已复制到剪贴板！</span>
-    </div>
-
-    <div class="hint-box">
-      <strong>如何使用：</strong>
-      <ol>
-        <li>在上方文本框中编辑你的画像（支持 Markdown 语法）</li>
-        <li>点击"复制修改后的内容"按钮</li>
-        <li>回到 Claude Code 对话窗口，粘贴内容并发送</li>
-        <li>Agent 会自动应用你的修改</li>
-      </ol>
-      <p>或者直接回复 <code>确认提交</code> 保持当前版本不变。</p>
-    </div>
-  </div>
-
-  <script>
-    function copyMarkdown() {
-      const textarea = document.getElementById('markdown-editor');
-      textarea.select();
-      try {
-        document.execCommand('copy');
-        const feedback = document.getElementById('copy-feedback');
-        feedback.style.display = 'inline';
-        setTimeout(() => { feedback.style.display = 'none'; }, 2000);
-      } catch (err) {
-        alert('复制失败，请手动按 Ctrl+C / Cmd+C 复制');
-      }
-    }
-  </script>
-</body>
-</html>
+<div class="section">
+  <h2>Section 标题</h2>
+  <div>Section 内容（Markdown 转 HTML）</div>
+</div>
 ```
 
-保存到 `./USER-profile/[nickname]/hitl-preview.html`
+- 空内容显示为 `<span class="pending">待补充</span>`
+- 列表保持 `<ul>` / `<li>` 结构
+- 代码块用 `<pre>` 包裹
+
+**模板维护**：
+- 修改样式或布局时，只需编辑 `hitl-template.html`
+- `SKILL.md` 中不包含 HTML 代码，只描述替换逻辑
 
 ### 2. 打开浏览器
 
