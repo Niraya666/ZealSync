@@ -19,6 +19,9 @@ Thumbs.db
 docs/
 .docs/
 
+# User-generated data (onboarding profiles)
+USER-profile/
+
 # Temporary files
 *.tmp
 *.log
