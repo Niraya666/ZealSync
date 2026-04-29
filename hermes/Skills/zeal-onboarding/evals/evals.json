@@ -1,0 +1,46 @@
+{
+  "skill_name": "zeal-onboarding",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "用户说：'帮我创建社群画像'。当前目录下没有 USER-profile/ 目录，lark-cli 已安装且 auth 有效。请执行完整的 onboarding 流程。",
+      "expected_output": "依次执行 init（检查通过）、extract（检测到 Hermes harness，询问是否提供其他 harness memory）、interview（通过 clarify 工具收集信息）、hitl（生成 HTML 预览并引导确认），最终生成 USER.md 并上传飞书文档。",
+      "files": [],
+      "expectations": [
+        "创建了 USER-profile/ 目录和 .state.json",
+        "调用了 init skill 检查 lark-cli 和 auth",
+        "检测到当前 harness 为 Hermes",
+        "通过 clarify 工具进行了不超过 5 轮的对话收集",
+        "生成了 hitl-preview.html 文件",
+        "调用了 lark-cli docs +create 上传文档",
+        "最终的 USER.md 包含 6 个核心 Section 和 YAML frontmatter"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "用户说：'更新我的画像'。当前 USER-profile/ 目录存在，.state.json 显示 status: completed，且 USER.md 已存在。",
+      "expected_output": "询问用户是重新生成还是增量更新。用户选择增量更新后，读取现有 USER.md，询问要修改的 Section，应用修改后重新提交。",
+      "files": ["USER-profile/.state.json", "USER-profile/test-user/USER.md"],
+      "expectations": [
+        "检测到已有完成的画像",
+        "询问用户是重新生成还是更新",
+        "读取现有 USER.md 内容",
+        "允许用户指定修改的 Section",
+        "更新后版本号递增（v1.0.0 → v1.0.1）",
+        "调用 lark-cli docs +update 更新飞书文档"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "用户说：'帮我创建画像'，但在 interview 阶段第 3 轮时退出对话。之后用户重新触发 onboarding。",
+      "expected_output": "读取 .state.json 发现 status: interviewed 且记录了已完成的轮次，从断点继续，不再重复询问已回答的问题。",
+      "files": ["USER-profile/.state.json"],
+      "expectations": [
+        "读取断点状态",
+        "从第 4 轮继续而非从头开始",
+        "不重复询问已完成的 Section",
+        "最终生成完整的 USER.md"
+      ]
+    }
+  ]
+}
