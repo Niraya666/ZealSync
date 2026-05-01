@@ -22,9 +22,11 @@
 
 **设计原则**：
 - 全部 Agent 驱动，无脚本
-- Skill 本身不包含具体社群的隐私信息（人名、角色分配等），这些内容存放在 `context/` 目录下的外部文件中
-- Skill 运行时查阅 `context/` 文件获取社群特定规则
-- 保证可迁移性：换到另一个社群时，只需替换 `context/` 文件
+- Skill 本身不包含具体社群的隐私信息（人名、角色分配等）
+- 社群特定数据存放在**工作路径**下的 `docs/zeal-mining/context/` 中
+- Skill 运行时读取工作路径下的 context 文件
+- Skill 目录下的 `context/` 只保留空白模板，供新社群初始化时参考
+- 保证可迁移性：换到另一个社群时，只需替换工作路径下的 context 文件
 
 ## 上下文文件
 
@@ -32,9 +34,9 @@
 
 | 文件 | 内容 | 用途 |
 |------|------|------|
-| `context/community-rules.md` | 社群角色定义、格式规范、数据源路径 | Extract + Align |
-| `context/name-corrections.md` | ASR 错误修正、昵称-实名映射、特殊格式处理 | Align |
-| `context/topic-tags.md` | 话题标签词库 | Profile |
+| `docs/zeal-mining/context/community-rules.md` | 社群角色定义、格式规范、数据源路径 | Extract + Align |
+| `docs/zeal-mining/context/name-corrections.md` | ASR 错误修正、昵称-实名映射、特殊格式处理 | Align |
+| `docs/zeal-mining/context/topic-tags.md` | 话题标签词库 | Profile |
 
 ## 状态机
 
@@ -60,8 +62,8 @@
 ### 初始化模式（全量处理）
 
 ```
-1. 读取 context/community-rules.md 了解社群规则
-2. 读取 context/name-corrections.md 了解已知映射
+1. 读取 docs/zeal-mining/context/community-rules.md 了解社群规则
+2. 读取 docs/zeal-mining/context/name-corrections.md 了解已知映射
 3. 识别所有待处理期数（扫描会议纪要目录）
 4. FOR each 期数:
    a. 调用 Extract Agent → 生成 session-{n}-raw.json
@@ -97,7 +99,7 @@
   - 会议纪要文档（纪要全文）
 输出：
   - docs/member-profiles/session-{n}-raw.json
-上下文：读取 context/community-rules.md 了解格式规范
+上下文：读取 docs/zeal-mining/context/community-rules.md 了解格式规范
 说明：参见 extract/SKILL.md
 ```
 
@@ -109,7 +111,7 @@
   - docs/member-profiles/session-{n}-raw.json
 输出：
   - docs/member-profiles/session-{n}-aligned.json
-上下文：读取 context/name-corrections.md 了解已知映射和 ASR 修正
+上下文：读取 docs/zeal-mining/context/name-corrections.md 了解已知映射和 ASR 修正
 说明：参见 align/SKILL.md。采用多 Agent Loop（Extractor→Matcher→Verifier→Judge）
 ```
 
@@ -122,7 +124,7 @@
   - docs/member-profiles/session-{n}-raw.json
 输出：
   - docs/member-profiles/{canonical-name}.md
-上下文：读取 context/topic-tags.md 了解话题分类
+上下文：读取 docs/zeal-mining/context/topic-tags.md 了解话题分类
 说明：参见 profile/SKILL.md
 ```
 
@@ -183,7 +185,7 @@ docs/member-profiles/
 
 ## 迁移到新社群
 
-1. 替换 `context/community-rules.md`：更新角色定义、格式规范、数据源路径
-2. 替换 `context/name-corrections.md`：更新昵称-实名映射、ASR 修正
-3. 替换 `context/topic-tags.md`：更新话题标签词库
+1. 替换工作路径下的 `docs/zeal-mining/context/community-rules.md`
+2. 替换工作路径下的 `docs/zeal-mining/context/name-corrections.md`
+3. 替换工作路径下的 `docs/zeal-mining/context/topic-tags.md`
 4. Skill 核心逻辑（SKILL.md 和各子 skill）无需修改

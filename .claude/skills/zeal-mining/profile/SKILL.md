@@ -7,7 +7,7 @@
 1. `docs/member-profiles/session-{n}-aligned.json` — 对齐结果
 2. `docs/member-profiles/session-{n}-raw.json` — 原始提取数据（用于补充发言内容、好物等）
 
-**上下文**：运行前读取 `context/topic-tags.md` 了解话题分类词库。
+**上下文**：运行前读取 `docs/zeal-mining/context/topic-tags.md` 了解话题分类词库。
 
 ## 任务
 

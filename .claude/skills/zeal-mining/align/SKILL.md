@@ -6,7 +6,7 @@
 ## 输入
 `docs/member-profiles/session-{n}-raw.json`
 
-**上下文**：运行前读取 `context/community-rules.md` 了解角色定义，读取 `context/name-corrections.md` 了解已知的昵称-实名映射和 ASR 修正。
+**上下文**：运行前读取 `docs/zeal-mining/docs/zeal-mining/context/community-rules.md` 了解角色定义，读取 `docs/zeal-mining/docs/zeal-mining/context/name-corrections.md` 了解已知的昵称-实名映射和 ASR 修正。
 
 ## 核心任务
 
@@ -62,7 +62,7 @@
 - 从 `content` 中提取所有第一人称表述（"我是..."、"我叫..."、"我在..."）
 - 从 `chapters[].content` 中提取说话人的自我称呼和被他人称呼
 - 从 `background` 中提取行业、岗位关键词
-- 生成话题标签：参考 `context/topic-tags.md` 中的话题词库
+- 生成话题标签：参考 `docs/zeal-mining/context/topic-tags.md` 中的话题词库
 
 ### Round 2: Matcher
 
@@ -111,7 +111,7 @@
 对 NEEDS_REVIEW / CONFLICT 案例重新推理：
 - 读取更多上下文（如相邻章节的发言）
 - 对比多期数据（如该成员是否在其他期出现过）
-- 查阅 `context/name-corrections.md` 了解已知的 ASR 错误和映射
+- 查阅 `docs/zeal-mining/context/name-corrections.md` 了解已知的 ASR 错误和映射
 - 如仍无法确定，标记为 UNCERTAIN 并说明原因
 
 ## 对齐原则
@@ -125,12 +125,12 @@
    - 将纪要中的实名加入 `aliases` 列表
 
 3. **角色识别**
-   - 主持人：参考 `context/community-rules.md` 中的主持人定义
+   - 主持人：参考 `docs/zeal-mining/context/community-rules.md` 中的主持人定义
    - 领航员：纪要中明确标注 "领航员XXX"
    - 参与者：默认角色
 
 4. **ASR 修正**
-   - 对齐时查阅 `context/name-corrections.md` 中的 ASR 错误修正表
+   - 对齐时查阅 `docs/zeal-mining/context/name-corrections.md` 中的 ASR 错误修正表
    - 如遇到已知的识别错误（如行业描述错误），优先采用正确表述
 
 ## 输出

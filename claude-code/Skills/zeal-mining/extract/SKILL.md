@@ -7,7 +7,7 @@
 1. 好物分享汇总文档中对应期数的小作文段落
 2. 会议纪要全文
 
-**上下文**：运行前读取 `context/community-rules.md` 了解社群特定的格式规范和数据源路径。
+**上下文**：运行前读取 `docs/zeal-mining/context/community-rules.md` 了解社群特定的格式规范和数据源路径。
 
 ## 任务
 

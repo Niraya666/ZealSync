@@ -10,7 +10,7 @@
 2. 现有档案目录 `docs/member-profiles/*.md`
 3. 现有索引 `docs/member-profiles/index.json`
 
-**上下文**：运行前读取 `context/community-rules.md` 了解社群特定的角色定义和特殊处理规则。
+**上下文**：运行前读取 `docs/zeal-mining/docs/zeal-mining/context/community-rules.md` 了解社群特定的角色定义和特殊处理规则。
 
 ## 合并逻辑
 
@@ -61,7 +61,7 @@ roles:
 - `industry` / `role` frontmatter 字段：保留首次出现的值，后续期不更新
 - `aliases`：首次建立档案时写入，后续期发现的新 alias 才追加
 - 跨期行业描述差异：不尝试智能合并，保留各期原始表述
-  - 例外：如果 `context/name-corrections.md` 中有 ASR 修正记录，优先采用正确表述
+  - 例外：如果 `docs/zeal-mining/context/name-corrections.md` 中有 ASR 修正记录，优先采用正确表述
 - 观点冲突：同一成员在不同期对同一话题的不同看法，**全部保留**，标注期数，体现观点演进
 
 ### 4. 索引更新
@@ -99,7 +99,7 @@ roles:
 
 ## 特殊处理
 
-参考 `context/community-rules.md` 中的角色定义处理特殊情况：
+参考 `docs/zeal-mining/context/community-rules.md` 中的角色定义处理特殊情况：
 
 - **主持人**：所有期中的主持人角色记录保留
 - **角色变化**：某人从 "参与者" 变为 "领航员" 时，保留两条记录
