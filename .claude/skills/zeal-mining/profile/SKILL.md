@@ -7,6 +7,8 @@
 1. `docs/member-profiles/session-{n}-aligned.json` — 对齐结果
 2. `docs/member-profiles/session-{n}-raw.json` — 原始提取数据（用于补充发言内容、好物等）
 
+**上下文**：运行前读取 `context/topic-tags.md` 了解话题分类词库。
+
 ## 任务
 
 为每个 `canonical_name` 生成或更新个人档案 Markdown。
@@ -53,7 +55,7 @@ confidence: {high|medium|low}
 {每条观点需标注：}
 { - 来源期数}
 { - 来源类型：小作文 / 会议纪要发言 / 关键决策}
-{ - 主题标签}
+{ - 主题标签（参考 context/topic-tags.md）}
 
 ## Reviews & Interactions
 
