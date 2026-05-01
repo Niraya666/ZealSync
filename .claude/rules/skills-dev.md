@@ -40,6 +40,27 @@ claude-code/
 - 每个 skill 必须包含 `evals/evals.json` 测试用例
 - Skill 命名使用 kebab-case，与目录名一致
 
+## Skill 设计原则
+
+### 隐私与数据分离
+- Skill 本身**不得包含**具体社群的隐私信息（人名、角色分配、具体规则等）
+- 社群特定数据存放在**工作路径**下的外部文件中（如 `docs/{skill-name}/context/`）
+- Skill 目录下的 `context/` 只保留**空白模板**，供新社群初始化时参考
+- 保证可迁移性：换到另一个社群时，只需替换工作路径下的数据文件
+
+### Agent 驱动
+- 优先使用 Agent 完成数据提取、推理、生成，减少脚本依赖
+- 如需脚本辅助，仅限 Python 标准库，零第三方依赖
+- 脚本负责 I/O 协调，复杂推理由 Agent 完成
+
+### 上下文文件规范
+- Skill 运行时应先读取工作路径下的上下文文件获取社群规则
+- 上下文文件路径统一使用 `docs/{skill-name}/context/` 格式
+- 上下文文件类型：
+  - `community-rules.md` — 社群角色定义、格式规范、数据源路径
+  - `name-corrections.md` — ASR 错误修正、昵称-实名映射
+  - `topic-tags.md` — 话题标签词库
+
 ## 跨 Harness 兼容
 
 - 禁止在 skill 中硬编码 harness 特定 API

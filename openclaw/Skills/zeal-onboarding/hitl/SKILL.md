@@ -61,10 +61,21 @@ open ./USER-profile/{{nickname}}/USER.md
 
 **模板文件位置**：`hitl/hitl-template.html`
 
-**生成流程**：
+**自动生成（推荐）**：
 
-1. 读取模板文件 `hitl/hitl-template.html`
-2. 替换占位符：
+调用 `generate-preview.py` 脚本，自动从 server log 读取实际端口并替换占位符：
+
+```bash
+python3 ./openclaw/Skills/zeal-onboarding/hitl/generate-preview.py \
+  --server-log /tmp/zeal-server-{{nickname}}.log \
+  --user-md ./USER-profile/{{nickname}}/USER.md \
+  --template ./openclaw/Skills/zeal-onboarding/hitl/hitl-template.html \
+  --output ./USER-profile/{{nickname}}/hitl-preview.html
+```
+
+**手动替换（降级方案）**：
+
+如无法运行 Python 脚本，可手动替换模板中的占位符：
 
 | 占位符 | 替换内容 |
 |---|---|
@@ -74,9 +85,9 @@ open ./USER-profile/{{nickname}}/USER.md
 | `{{TAGS_HTML}}` | 标签渲染为 `<span class="tag">...</span>` |
 | `{{SECTIONS_HTML}}` | 各 Section 渲染为 `<div class="section">...</div>` |
 | `{{RAW_MARKDOWN}}` | 完整的 USER.md Markdown 原文 |
-| `{{SERVER_PORT}}` | 本地保存服务的端口号 |
+| `{{SERVER_PORT}}` | 本地保存服务的端口号（必须与 server log 中输出的一致） |
 
-3. 保存到 `./USER-profile/[nickname]/hitl-preview.html`
+保存到 `./USER-profile/[nickname]/hitl-preview.html`
 
 **Section 渲染规则**：
 
