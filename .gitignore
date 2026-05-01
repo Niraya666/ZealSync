@@ -21,6 +21,10 @@ Thumbs.db
 # User-generated data (onboarding profiles)
 USER-profile/
 
+# Generated member profiles from zeal-mining
+docs/member-profiles/
+
 # Temporary files
 *.tmp
 *.log
+docs/zeal-mining/

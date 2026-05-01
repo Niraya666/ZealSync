@@ -1,0 +1,152 @@
+{
+  "evals": [
+    {
+      "name": "extract-tenth-session",
+      "description": "Extract structured data from 第十期小作文 and 会议纪要",
+      "input": {
+        "essay_source": ".docs/内容回顾/张江-星辰大海Coffee_Chat内容回顾.md 第十期段落",
+        "minutes_source": ".docs/内容回顾/会议纪要/第十期-社群发展方向与项目规划讨论.md"
+      },
+      "expected_output": {
+        "essays_count": 10,
+        "sample_essay": {
+          "nickname": "Shawn",
+          "industry": "智驾",
+          "role": "研发管理",
+          "favorites": ["《数学觉醒：学会更清晰地思考》"],
+          "mentions": ["Eva"]
+        },
+        "attendees_count": ">=9",
+        "speakers_count": ">=11",
+        "host_identified": "Eva/伊娃",
+        "navigator_identified": "无"
+      }
+    },
+    {
+      "name": "align-tenth-session",
+      "description": "Align identities in 第十期 using multi-agent loop",
+      "input": {
+        "raw_json": "session-第十期-raw.json"
+      },
+      "expected_output": {
+        "mappings": [
+          {
+            "canonical_name": "Shawn",
+            "aliases": ["邵昂"],
+            "speaker_ids": ["说话人2"],
+            "confidence": "high",
+            "role": "参与者"
+          },
+          {
+            "canonical_name": "三金",
+            "aliases": [],
+            "speaker_ids": ["说话人6"],
+            "confidence": "high",
+            "role": "参与者"
+          },
+          {
+            "canonical_name": "Eva",
+            "aliases": ["伊娃"],
+            "speaker_ids": ["说话人1"],
+            "confidence": "high",
+            "role": "主持人"
+          }
+        ],
+        "all_speakers_mapped": true,
+        "all_essays_mapped": true,
+        "no_conflicts": true
+      }
+    },
+    {
+      "name": "align-shawn-shaang",
+      "description": "Test alignment for nickname-realname mismatch (Shawn vs 邵昂)",
+      "input": {
+        "essay_nickname": "Shawn-智驾-研发管理",
+        "essay_content": "...愿用文字输出助力社团品牌化...",
+        "attendee_name": "邵昂",
+        "attendee_background": "消费电子行业做手机项目PMO",
+        "speaker_chapters": ["本章节中，说话人2介绍自己在消费电子行业做手机项目PMO..."]
+      },
+      "expected_output": {
+        "canonical_name": "Shawn",
+        "aliases": ["邵昂"],
+        "reasoning_contains": ["消费电子", "品牌化", "PMO"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "align-eva-host",
+      "description": "Test Eva identification as host across all sessions",
+      "input": {
+        "session": "any",
+        "essay_nickname": "Eva（社群发起人）",
+        "minutes_role": "主持人"
+      },
+      "expected_output": {
+        "canonical_name": "Eva",
+        "aliases": ["伊娃"],
+        "role": "主持人",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "profile-generation",
+      "description": "Generate profile for a member with aligned data",
+      "input": {
+        "canonical_name": "Shawn",
+        "aligned_data": "session-第十期-aligned.json",
+        "raw_data": "session-第十期-raw.json"
+      },
+      "expected_output": {
+        "file_exists": "docs/member-profiles/Shawn.md",
+        "sections": ["Identity", "Activity History", "Core Views", "Reviews & Interactions", "Favorites"],
+        "activity_history_contains": "第十期",
+        "favorites_contains": "数学觉醒",
+        "core_views_contains": "团魂"
+      }
+    },
+    {
+      "name": "merge-incremental",
+      "description": "Test merging a new session into existing profiles",
+      "input": {
+        "existing_profile": "docs/member-profiles/三金.md",
+        "new_session": "第十期",
+        "new_role": "参与者"
+      },
+      "expected_output": {
+        "sessions_count_incremented": true,
+        "activity_history_appended": true,
+        "identity_not_overwritten": true
+      }
+    },
+    {
+      "name": "special-format-handling",
+      "description": "Test handling of special nickname formats",
+      "input": {
+        "special_cases": [
+          {"raw": "@&", "expected_canonical": "&"},
+          {"raw": "@Liqp", "expected_canonical": "Liqp"},
+          {"raw": "@Eva（社群发起人）", "expected_canonical": "Eva"}
+        ]
+      },
+      "expected_output": {
+        "all_canonical_names_valid": true,
+        "no_empty_canonical": true
+      }
+    },
+    {
+      "name": "cross-session-aggregation",
+      "description": "Test aggregation of member data across multiple sessions",
+      "input": {
+        "member": "三金",
+        "sessions": ["第一期", "第十期"]
+      },
+      "expected_output": {
+        "sessions_count": 2,
+        "roles_contains": ["领航员", "参与者"],
+        "favorites_unique": true,
+        "identity_merged": true
+      }
+    }
+  ]
+}
