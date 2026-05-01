@@ -1,0 +1,22 @@
+{
+  "sessions": [
+    {
+      "session_id": "第十期",
+      "date": "2026-04-26",
+      "theme": "社群发展方向与项目规划讨论",
+      "host": ["Eva"],
+      "navigators": [],
+      "participants": ["Shawn", "三金", "TX"],
+      "essays_count": 10,
+      "alignment_confidence": 0.92
+    }
+  ],
+  "members_summary": {
+    "total_unique": 35,
+    "hosts": ["Eva"],
+    "navigator_history": {
+      "三金": ["第一期"],
+      "薛晓杰": ["第九期"]
+    }
+  }
+}
