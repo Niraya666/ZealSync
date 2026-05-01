@@ -55,7 +55,7 @@ confidence: {high|medium|low}
 {每条观点需标注：}
 { - 来源期数}
 { - 来源类型：小作文 / 会议纪要发言 / 关键决策}
-{ - 主题标签（参考 context/topic-tags.md）}
+{ - 主题标签（参考 `docs/zeal-mining/context/topic-tags.md`）}
 
 ## Reviews & Interactions
 

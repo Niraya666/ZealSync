@@ -10,7 +10,7 @@
 2. 现有档案目录 `docs/member-profiles/*.md`
 3. 现有索引 `docs/member-profiles/index.json`
 
-**上下文**：运行前读取 `docs/zeal-mining/docs/zeal-mining/context/community-rules.md` 了解社群特定的角色定义和特殊处理规则。
+**上下文**：运行前读取 `docs/zeal-mining/context/community-rules.md` 了解社群特定的角色定义和特殊处理规则。
 
 ## 合并逻辑
 

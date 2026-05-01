@@ -6,7 +6,7 @@
 ## 输入
 `docs/member-profiles/session-{n}-raw.json`
 
-**上下文**：运行前读取 `docs/zeal-mining/docs/zeal-mining/context/community-rules.md` 了解角色定义，读取 `docs/zeal-mining/docs/zeal-mining/context/name-corrections.md` 了解已知的昵称-实名映射和 ASR 修正。
+**上下文**：运行前读取 `docs/zeal-mining/context/community-rules.md` 了解角色定义，读取 `docs/zeal-mining/context/name-corrections.md` 了解已知的昵称-实名映射和 ASR 修正。
 
 ## 核心任务
 
