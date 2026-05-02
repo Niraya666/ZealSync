@@ -57,7 +57,7 @@
       "name": "frontmatter-stripped",
       "description": "验证档案内容字段已去掉 frontmatter",
       "input": {
-        "sample_md": "docs/member-profiles/Shawn.md"
+        "sample_md": "docs/member-profiles/member-a.md"
       },
       "expected_output": {
         "no_yaml_delimiters": true,

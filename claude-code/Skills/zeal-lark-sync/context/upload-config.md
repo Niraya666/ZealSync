@@ -41,5 +41,5 @@ folder_token: "YOUR_FOLDER_TOKEN"
 base_token: "YOUR_BASE_TOKEN"
 members_table_id: "tblXXXXXXXX"
 sessions_table_id: "tblYYYYYYYY"
-drive_base_url: "https://ecn7o2uqwaxt.feishu.cn/file"
+drive_base_url: "https://{tenant}.feishu.cn/file"
 ```

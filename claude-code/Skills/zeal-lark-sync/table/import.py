@@ -162,7 +162,7 @@ def main():
     parser.add_argument("--index", required=True, help="Path to index.json")
     parser.add_argument("--md-dir", default="docs/member-profiles", help="Directory of .md files")
     parser.add_argument("--file-map", default="", help='JSON string of {"name": "file_token"}')
-    parser.add_argument("--drive-base-url", default="https://ecn7o2uqwaxt.feishu.cn/file", help="Drive file URL prefix")
+    parser.add_argument("--drive-base-url", default="https://{tenant}.feishu.cn/file", help="Drive file URL prefix")
     parser.add_argument("--import-sessions", action="store_true", help="Import sessions instead of members")
     args = parser.parse_args()
 

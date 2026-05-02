@@ -47,9 +47,9 @@ python3 .claude/skills/zeal-lark-sync/upload/upload.py \
 **示例**：
 ```markdown
 ---
-name: Shawn
-description: 咨询管理创始人
-tags: [咨询管理, 创始人, AI]
+name: Alice
+description: 某行业从业者
+tags: [行业A, 创业者, AI]
 ---
 ```
 
@@ -57,9 +57,9 @@ tags: [咨询管理, 创始人, AI]
 ```markdown
 | 属性 | 内容 |
 |------|------|
-| name | Shawn |
-| description | 咨询管理创始人 |
-| tags | 咨询管理、创始人、AI |
+| name | Alice |
+| description | 某行业从业者 |
+| tags | 行业A、创业者、AI |
 
 # Identity
 ...
