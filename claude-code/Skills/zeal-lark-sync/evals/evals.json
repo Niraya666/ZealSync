@@ -1,0 +1,95 @@
+{
+  "evals": [
+    {
+      "name": "upload-md-files",
+      "description": "批量上传 .md 文件到云盘",
+      "input": {
+        "md_dir": "docs/member-profiles",
+        "folder_token": "TEST_FOLDER_TOKEN"
+      },
+      "expected_output": {
+        "ok_count": ">=40",
+        "output_format": "OK:<name>:<file_token>",
+        "summary_format": "SUMMARY:ok=N:fail=M:total=P"
+      }
+    },
+    {
+      "name": "import-members-batch",
+      "description": "分批导入成员数据到多维表格",
+      "input": {
+        "index_path": "docs/member-profiles/index.json",
+        "md_dir": "docs/member-profiles",
+        "members_table_id": "TEST_TABLE_ID"
+      },
+      "expected_output": {
+        "total_imported": ">=45",
+        "batch_size": 5,
+        "batch_delay_seconds": 5,
+        "no_duplicate_records": true
+      }
+    },
+    {
+      "name": "import-sessions",
+      "description": "导入活动记录到多维表格",
+      "input": {
+        "index_path": "docs/member-profiles/index.json",
+        "sessions_table_id": "TEST_TABLE_ID"
+      },
+      "expected_output": {
+        "sessions_imported": ">=10",
+        "fields_present": ["期数", "日期", "主题", "参与人数", "领航员", "主持人", "状态"]
+      }
+    },
+    {
+      "name": "json-file-transit",
+      "description": "验证 JSON 通过文件中转避免换行截断",
+      "input": {
+        "payload_contains_newlines": true,
+        "md_body_length": ">=1000"
+      },
+      "expected_output": {
+        "temp_file_created": true,
+        "lark_cli_called_with_cat": true,
+        "no_truncation_errors": true
+      }
+    },
+    {
+      "name": "frontmatter-stripped",
+      "description": "验证档案内容字段已去掉 frontmatter",
+      "input": {
+        "sample_md": "docs/member-profiles/member-a.md"
+      },
+      "expected_output": {
+        "no_yaml_delimiters": true,
+        "body_starts_with_heading_or_paragraph": true,
+        "content_length": ">=500"
+      }
+    },
+    {
+      "name": "text-fields-only",
+      "description": "验证全部使用 text/number 字段，无 select/multiSelect",
+      "input": {
+        "members_table_schema": "成员总表"
+      },
+      "expected_output": {
+        "field_types": ["text", "number"],
+        "no_select_fields": true,
+        "no_multiselect_fields": true
+      }
+    },
+    {
+      "name": "end-to-end-verify",
+      "description": "端到端验证：成员数、活动数、内容完整性",
+      "input": {
+        "expected_members": 50,
+        "expected_sessions": 10
+      },
+      "expected_output": {
+        "members_count_match": true,
+        "sessions_count_match": true,
+        "sample_content_length": ">=500",
+        "sample_file_url_valid": true
+      }
+    }
+  ]
+}
