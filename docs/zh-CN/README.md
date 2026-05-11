@@ -13,7 +13,7 @@ ZealSync 是一个基于 Agent 的社群信息撮合系统。通过对话式信�
 ## 核心特性
 
 - **对话式画像生成**：Agent 通过自然对话收集用户基本信息，降低填写门槛
-- **多源信息整合**：自动读取用户已有的 Agent 工具记忆（claude-code / openClaw / Hermes），减少重复输入
+- **多源信息整合**：自动读取用户授权的 Agent 工具记忆（claude-code / openClaw / Hermes / Codex workspace），减少重复输入
 - **隐私优先设计**：主动过滤真实姓名、公司名、手机号等敏感信息，仅保留 nickname 与泛化描述
 - **人机协同确认（HITL）**：生成画像后提供可视化编辑页面，用户可浏览并修改后再提交
 - **飞书文档输出**：画像确认后自动上传至飞书文档，便于社群共享与检索
@@ -43,8 +43,10 @@ ZealSync/
 ├── hermes/                         # Hermes harness skills
 │   └── Skills/
 │       └── zeal-onboarding/        # Hermes 版 onboarding skill
-├── codex/                          # codex harness skills（预留）
-├── openclaw/                       # OpenClaw harness skills
+├── codex/                          # Codex harness skills
+│   └── Skills/
+│       └── zeal-onboarding/        # Codex 版 onboarding skill
+├── openClaw/                       # OpenClaw harness skills
 ├── .claude/rules/                  # 开发规范
 ├── .docs/                          # 设计文档与经验总结
 └── USER-profile/                   # 用户画像输出目录
@@ -107,7 +109,7 @@ hermes -s zeal-onboarding
 
 ```bash
 # 复制 skill 到 OpenClaw 的 skills 目录
-cp -r ./openclaw/Skills/zeal-onboarding \
+cp -r ./openClaw/Skills/zeal-onboarding \
       ~/.openclaw/workspace/skills/zeal-onboarding
 ```
 
@@ -121,9 +123,26 @@ cp -r ./openclaw/Skills/zeal-onboarding \
 - 对话交互：自然对话（无需显式工具调用）
 - Memory 读取：直接文件读取 `~/.openclaw/workspace/` + `memory_search`/`memory_get` 搜索补充
 
-### Codex（预留）
+### Codex
 
-尚未适配，欢迎贡献。
+```bash
+# 复制 skill 到 Codex 的 skills 目录
+mkdir -p ~/.agents/skills
+
+cp -r ./codex/Skills/zeal-onboarding \
+      ~/.agents/skills/zeal-onboarding
+```
+
+触发方式：在 Codex 对话中输入任意触发词
+- "帮我创建社群画像"
+- "生成 USER.md"
+- "ZealSync onboarding"
+- "我要加入社群"
+
+**Codex 特性**：
+- Workspace-first：优先读取当前 workspace、既有 `USER-profile/` 与用户粘贴资料
+- 权限确认：读取其他 harness 目录、联网、OAuth、GUI 打开前先说明目的并确认
+- HITL 预览：优先使用 Codex Browser 打开本地 HTML；不可用时返回绝对路径
 
 ## 快速开始
 
@@ -146,4 +165,6 @@ cp -r ./openclaw/Skills/zeal-onboarding \
 ## 相关文档
 
 - [MIGRATION-NOTES.md](../../hermes/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Hermes 迁移说明
-- [MIGRATION-NOTES.md](../../openclaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw 迁移说明
+- [MIGRATION-NOTES.md](../../openClaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw 迁移说明
+- [Codex Onboarding](../zeal-onboarding/codex.md) — Codex 版本说明
+- [MIGRATION-NOTES.md](../../codex/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Codex 迁移说明

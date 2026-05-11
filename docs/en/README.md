@@ -13,7 +13,7 @@ ZealSync is a community information matching system powered by AI Agents. Throug
 ## Key Features
 
 - **Conversational Profile Generation**: The Agent collects user information through natural dialogue, lowering the barrier to entry
-- **Multi-Source Information Integration**: Automatically reads existing Agent tool memories (claude-code / openClaw / Hermes) to reduce repetitive input
+- **Multi-Source Information Integration**: Reads user-approved Agent tool memories and Codex workspace context (claude-code / openClaw / Hermes / Codex) to reduce repetitive input
 - **Privacy-First Design**: Actively filters real names, company names, phone numbers, and other sensitive data — only nicknames and generalized descriptions are retained
 - **Human-in-the-Loop (HITL)**: After profile generation, a visual editing page is provided for users to review and modify before submission
 - **Lark (Feishu) Document Output**: Confirmed profiles are automatically uploaded to Lark documents for community sharing and retrieval
@@ -43,10 +43,12 @@ ZealSync/
 ├── hermes/                         # Hermes harness skills
 │   └── Skills/
 │       └── zeal-onboarding/        # Hermes onboarding skill
-├── openclaw/                       # openClaw harness skills
+├── codex/                          # Codex harness skills
+│   └── Skills/
+│       └── zeal-onboarding/        # Codex onboarding skill
+├── openClaw/                       # openClaw harness skills
 │   └── Skills/
 │       └── zeal-onboarding/        # openClaw onboarding skill
-├── codex/                          # codex harness skills (reserved)
 ├── .claude/rules/                  # Development rules
 ├── .docs/                          # Design docs & lessons learned
 └── USER-profile/                   # User profile output directory
@@ -109,7 +111,7 @@ hermes -s zeal-onboarding
 
 ```bash
 # Copy skill to OpenClaw's skills directory
-cp -r ./openclaw/Skills/zeal-onboarding \
+cp -r ./openClaw/Skills/zeal-onboarding \
       ~/.openclaw/workspace/skills/zeal-onboarding
 ```
 
@@ -123,9 +125,26 @@ Trigger in an OpenClaw conversation with any of:
 - Conversation: Natural dialogue (no explicit tool calls required)
 - Memory reading: Direct file reads from `~/.openclaw/workspace/` + `memory_search`/`memory_get` as supplementary search
 
-### Codex (Reserved)
+### Codex
 
-Not yet adapted. Contributions welcome.
+```bash
+# Copy skill to Codex's skills directory
+mkdir -p ~/.agents/skills
+
+cp -r ./codex/Skills/zeal-onboarding \
+      ~/.agents/skills/zeal-onboarding
+```
+
+Trigger in a Codex conversation with any of:
+- "帮我创建社群画像"
+- "生成 USER.md"
+- "ZealSync onboarding"
+- "我要加入社群"
+
+**Codex Features**:
+- Workspace-first: reads the current workspace, existing `USER-profile/`, and user-provided material first
+- Permission-aware: asks before reading other harness directories, using network/OAuth flows, or opening GUI apps
+- HITL preview: prefers Codex Browser for local HTML; falls back to returning the absolute preview path
 
 ## Quick Start
 
@@ -148,4 +167,6 @@ Not yet adapted. Contributions welcome.
 ## Related Docs
 
 - [MIGRATION-NOTES.md](../../hermes/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Hermes migration notes
-- [MIGRATION-NOTES.md](../../openclaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw migration notes
+- [MIGRATION-NOTES.md](../../openClaw/Skills/zeal-onboarding/MIGRATION-NOTES.md) — OpenClaw migration notes
+- [Codex Onboarding](../zeal-onboarding/codex.md) — Codex version notes
+- [MIGRATION-NOTES.md](../../codex/Skills/zeal-onboarding/MIGRATION-NOTES.md) — Codex migration notes

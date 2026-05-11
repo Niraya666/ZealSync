@@ -19,7 +19,7 @@ ZealSync onboarding skills are available for multiple AI Agent harnesses:
 
 - **Claude Code** — `claude-code/Skills/zeal-onboarding/`
 - **Hermes** — `hermes/Skills/zeal-onboarding/`
-- **OpenClaw** — `openclaw/Skills/zeal-onboarding/`
-- **Codex** (reserved)
+- **OpenClaw** — `openClaw/Skills/zeal-onboarding/`
+- **Codex** — `codex/Skills/zeal-onboarding/`
 
 See the language-specific docs above for full installation instructions.
