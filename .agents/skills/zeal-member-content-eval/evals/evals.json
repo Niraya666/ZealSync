@@ -1,0 +1,27 @@
+{
+  "skill_name": "zeal-member-content-eval",
+  "evals": [
+    {
+      "id": 1,
+      "name": "authentic-practical-essay",
+      "prompt": "请使用 zeal-member-content-eval 评估这段 ZChat 候选人小作文，并生成管理员内部报告文件。输入：{\"candidate_id\":\"eval_authentic_001\",\"source_type\":\"小作文\",\"text\":\"我过去一年在一个 12 人的 AI 工具小组里做过组织协调。最早我以为大家缺的是更好的任务管理工具，后来发现真正的问题是每个人对'完成'的定义不一样：有人觉得 demo 能跑就算完成，有人觉得文档和复盘也要交付。我们尝试过每周同步，但会议越开越长。后来我把流程缩成三个动作：每个项目先写 5 行目标、每周只同步阻塞点、结束后用 15 分钟写失败原因。这个方法没有解决所有问题，比如遇到跨部门资源时还是很慢，但至少让新人知道怎么接手。我想在 ZChat 里继续观察小型组织如何把经验沉淀成工具，也愿意做活动复盘或流程整理，不一定要公开分享。\",\"context\":{\"activity_name\":\"ZChat 测试\",\"topic\":\"小型组织与 AI 工具\",\"known_background\":\"\"}}",
+      "expected_output": "生成 docs/member-content-evals/eval_authentic_001/ 下的 Markdown 和 JSON 报告；真实感悟、务实落地、贡献可能性应较高；商业风险应为无明显迹象或轻微；所有关键判断应引用 P# 段落证据。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "buzzword-heavy-essay",
+      "prompt": "请使用 zeal-member-content-eval 评估这段 ZChat 候选人小作文，并生成管理员内部报告文件。输入：{\"candidate_id\":\"eval_buzzword_001\",\"source_type\":\"报名问卷\",\"text\":\"AGI 时代最重要的是共识网络、生态飞轮和个体价值跃迁。未来所有组织都会被 Agent 重构，Token 化会带来全新的生产关系，我们要打造一个有势能的超级节点，连接认知高地与产业资源。我一直关注前沿趋势，也相信自己能给社群带来战略视角。真正的机会属于能看懂时代的人，ZChat 如果能抓住这个窗口，就会成为下一代组织文明的样板。\",\"context\":{\"activity_name\":\"ZChat 测试\",\"topic\":\"AGI 与组织关系\",\"known_background\":\"\"}}",
+      "expected_output": "报告应识别术语密集、缺少概念定义、缺少具体经验和落地路径；认知质量和真实感悟不应被宏大表达拉高；需要输出人工追问问题；不得评价人格或智商。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "commercial-boundary-risk",
+      "prompt": "请使用 zeal-member-content-eval 评估这段 ZChat 分享申请，并生成管理员内部报告文件。输入：{\"candidate_id\":\"eval_commercial_001\",\"source_type\":\"分享申请\",\"text\":\"我最近在做一个 AI 销售自动化平台，已经服务了几家创业公司。ZChat 里面应该有很多创始人和增长负责人，我希望通过一次分享帮大家理解 AI 如何提升获客效率。我们产品正好解决线索筛选和自动触达的问题，也欢迎大家会后试用或者私聊我，我可以给社群成员一个特别版本。如果这次反馈好，我也希望链接更多潜在合作方，一起把这个方向做大。\",\"context\":{\"activity_name\":\"ZChat 分享申请\",\"topic\":\"AI 销售自动化\",\"known_background\":\"候选人是创业者\"}}",
+      "expected_output": "报告可以承认内容可能有实践经验，但必须识别产品导向、获客/试用/私聊等商业边界风险；应给出商业风险扣分、M 或组合 M 标签建议、人工复核和边界追问。",
+      "files": []
+    }
+  ]
+}
+
